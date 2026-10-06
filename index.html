@@ -1338,6 +1338,9 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
   });
   video.addEventListener("play", videoLabel);
   video.addEventListener("pause", videoLabel);
+  // 別のアプリから戻ったときや、読み込みが間に合ったときに、はじめの画面なら再生を続ける
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") syncVideo(); });
+  video.addEventListener("canplay", () => { if (state.screen === "start" && video.paused && !reduceMotion) syncVideo(); }, { once: true });
 
   // ---------- 操作 ----------
   $("eras").addEventListener("click", e => {
