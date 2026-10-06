@@ -1,0 +1,1392 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f3e9cf">
+<meta property="og:type" content="website">
+<meta property="og:title" content="昭和の目利き">
+<meta property="og:description" content="昭和の品物の値段、覚えていますか？ 高い・安いを当てる、なつかしの値段あてゲーム">
+<meta property="og:url" content="https://gitorix.github.io/showa-mekiki/">
+<meta property="og:image" content="https://gitorix.github.io/showa-mekiki/%E7%94%BB%E5%83%8F/%E6%98%AD%E5%92%8C%E3%81%AE%E7%9B%AE%E5%88%A9%E3%81%8D_%E3%83%88%E3%83%83%E3%83%97%E5%8B%95%E7%94%BB_%E3%83%9D%E3%82%B9%E3%82%BF%E3%83%BC.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<title>昭和の目利き</title>
+<meta name="description" content="昭和の品物の値段を見くらべて当てる、時代を選べるハイ＆ローゲーム「昭和の目利き」">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Dela+Gothic+One&display=swap">
+<style>
+/* 昭和の商店街の特売チラシ。生成りの紙に朱と藍の二色刷り、差し色にからし色。
+   スマホ縦持ちが基本：1列、写真は大きく、文字はいちばん小さくても17px、文字色はすべてコントラスト比7以上。
+   飾りの模様は文字の後ろに置かない。問いかけと答えのボタンは画面の下に固定 */
+:root {
+  --paper: #f3e9cf;      /* 地の紙（生成り） */
+  --card: #fffaf0;       /* 品物の札・説明の紙 */
+  --ticket: #f8efd6;     /* 切符の紙 */
+  --ink: #26201b;        /* 墨 */
+  --ink-soft: #55493f;   /* うすい墨（それでも紙の上でコントラスト比7以上） */
+  --shu: #8e2617;        /* 朱：文字に使う濃さ */
+  --shu-fill: #a3301c;   /* 朱：ボタンや帯の塗り（生成りの文字で6.5） */
+  --ai: #1e3766;         /* 藍 */
+  --karashi: #e3a92b;    /* からし色（墨の文字をのせる） */
+  --wakatake: #22553c;   /* 若竹色：いまの値段 */
+  --cream: #fff6e2;      /* 塗りの上の文字 */
+  --gold: #b88a2c;       /* 賞状のふち */
+
+  /* 本文はユニバーサルデザインのゴシック体。見出しと大きな数字だけ、昭和の看板のような極太の文字 */
+  --font: "BIZ UDPGothic", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+  --display: "Dela Gothic One", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "BIZ UDPGothic", sans-serif;
+
+  --radius: 12px;
+  --offset: 4px;         /* 版ずれのような、ずらした影 */
+  color-scheme: light;
+  font-size: 20px;
+}
+:root.big { font-size: 23px; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { min-height: 100%; }
+html { touch-action: manipulation; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font);
+  font-weight: 400;
+  line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  word-break: auto-phrase;
+  line-break: strict;
+}
+b, strong { font-weight: 700; }
+button {
+  font-family: var(--font);
+  color: var(--ink);
+  touch-action: manipulation;
+  -webkit-user-select: none; user-select: none;
+  cursor: pointer;
+}
+button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outline-offset: 3px; }
+.display { font-family: var(--display); font-weight: 400; }
+
+/* 商店街の日よけテント（飾り。文字はのせない） */
+.awning {
+  height: 26px;
+  background: repeating-linear-gradient(90deg, var(--shu-fill) 0 26px, var(--cream) 26px 52px);
+  -webkit-mask: radial-gradient(13px at 13px 13px, #000 98%, transparent) 0 0 / 26px 26px repeat-x, linear-gradient(#000 0 0) 0 0 / 100% 13px no-repeat;
+          mask: radial-gradient(13px at 13px 13px, #000 98%, transparent) 0 0 / 26px 26px repeat-x, linear-gradient(#000 0 0) 0 0 / 100% 13px no-repeat;
+}
+
+.app {
+  max-width: 32rem;
+  margin: 0 auto;
+  padding-inline: 16px;
+  padding-block: 10px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.stack { display: flex; flex-direction: column; gap: 16px; }
+
+/* ---------- 上の帯 ---------- */
+.topbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.brand {
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: .06em;
+  background: var(--shu-fill);
+  color: var(--cream);
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+  padding: .1em .6em;
+  min-height: 2.4rem;
+  box-shadow: 3px 3px 0 var(--ink);
+  white-space: nowrap;
+}
+.brand:active, .brand.pressed { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--ink); }
+.tools { display: flex; gap: 8px; margin-left: auto; }
+.chip {
+  font-size: .9rem;
+  background: var(--card);
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  padding: .1em .8em;
+  min-height: 2.4rem;
+  white-space: nowrap;
+}
+.chip[aria-pressed="true"] { background: var(--ai); color: var(--cream); }
+.chip:active, .chip.pressed { transform: translateY(2px); filter: brightness(.9); }
+
+/* ---------- はじめの画面 ---------- */
+.tv { margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.tv video {
+  display: block;
+  width: 100%; max-width: 100%;
+  aspect-ratio: 16 / 9; height: auto;
+  object-fit: cover;
+  background: var(--ink);
+  border: 5px solid var(--ink);
+  border-radius: 22px;
+  box-shadow: var(--offset) var(--offset) 0 var(--karashi);
+}
+.tv-sound {
+  align-self: flex-end;
+  font-size: 1rem; font-weight: 700;
+  background: var(--card);
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  min-height: 2.6rem;
+  padding: .1em 1em;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+.tv-sound::before { content: "♪ "; color: var(--shu); }
+.tv-sound[aria-pressed="true"] { background: var(--ai); color: var(--cream); }
+.tv-sound[aria-pressed="true"]::before { color: var(--karashi); }
+.tv-sound:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--ink); }
+.hero { position: relative; display: flex; flex-direction: column; gap: 4px; padding-top: 4px; }
+.hero-ribbon {
+  align-self: flex-start;
+  margin: 0;
+  background: var(--ai); color: var(--cream);
+  font-size: .9rem; letter-spacing: .15em;
+  padding: .15em 1.1em .15em .8em;
+  clip-path: polygon(0 0, 100% 0, calc(100% - .6em) 50%, 100% 100%, 0 100%);
+}
+.hero-title {
+  margin: 6px 0 0;
+  font-family: var(--display); font-weight: 400;
+  font-size: 3.4rem; line-height: 1.05;
+  letter-spacing: .04em;
+  color: var(--ink);
+  text-shadow: var(--offset) var(--offset) 0 var(--karashi);
+}
+.hero-sub {
+  margin: 4px 0 0;
+  font-family: var(--display); font-weight: 400;
+  font-size: 1.9rem; line-height: 1.2;
+  color: var(--shu);
+  letter-spacing: .06em;
+}
+.hero-lead { margin: 6px 0 0; font-size: 1.05rem; line-height: 1.7; }
+/* チラシの「爆発マーク」。品目の数を知らせる */
+.burst {
+  position: absolute; right: 0; top: 40px;
+  margin: 0;
+  width: 6.2rem; height: 6.2rem;
+  display: grid; place-content: center; text-align: center;
+  background: var(--karashi);
+  color: var(--ink);
+  clip-path: polygon(50% 0, 61% 14%, 79% 7%, 80% 25%, 98% 28%, 88% 44%, 100% 58%, 83% 66%, 88% 84%, 70% 82%, 61% 100%, 50% 87%, 39% 100%, 30% 82%, 12% 84%, 17% 66%, 0 58%, 12% 44%, 2% 28%, 20% 25%, 21% 7%, 39% 14%);
+  transform: rotate(8deg);
+  line-height: 1.15;
+}
+.burst b { font-family: var(--display); font-weight: 400; font-size: 1.6rem; color: var(--shu); line-height: 1; }
+.burst span { font-size: .85rem; font-weight: 700; }
+/* 狭い画面と大きい字では、題字に重ならないよう爆発マークを出さない。写真の上の年の札も少し小さく */
+@media (max-width: 360px) { .burst { display: none; } .era { font-size: .85rem; } }
+:root.big .burst { display: none; }
+
+.era-title {
+  margin: 4px 0 0;
+  font-weight: 700;
+  font-size: 1.35rem; letter-spacing: .04em;
+  display: flex; align-items: center; gap: 10px;
+}
+.era-title::after { content: ""; flex: 1; height: 3px; background: var(--ink); }
+.eras { display: grid; grid-template-columns: 1fr; gap: 14px; }
+
+/* 時代を選ぶボタン＝昔の硬い紙の切符 */
+.ticket {
+  --band: var(--ai);
+  position: relative;
+  display: grid;
+  grid-template-columns: 5rem 1fr;
+  gap: 4px 14px;
+  align-items: center;
+  text-align: left;
+  background: var(--ticket);
+  border: 3px solid var(--ink);
+  border-left: 12px solid var(--band);
+  border-radius: 6px;
+  padding: 12px 14px 12px 12px;
+  box-shadow: var(--offset) var(--offset) 0 var(--ink);
+}
+/* 右端の切り欠き（改札ばさみの穴のような半円） */
+.ticket::after {
+  content: "";
+  position: absolute; right: -15px; top: 50%;
+  width: 24px; height: 24px; margin-top: -12px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  clip-path: inset(0 50% 0 0);
+}
+.ticket:active, .ticket.pressed { transform: translate(var(--offset), var(--offset)); box-shadow: 0 0 0 var(--ink); filter: brightness(.95); }
+.ticket.chosen { outline: 5px solid var(--karashi); outline-offset: 2px; }
+.ticket.t-s40 { --band: var(--wakatake); }
+.ticket.t-s50 { --band: var(--shu-fill); }
+.ticket.t-s60 { --band: #5b3a73; }
+.ticket.t-all { --band: var(--karashi); }
+.t-photo {
+  grid-row: span 3;
+  width: 5rem; height: 5rem;
+  border-radius: 6px;
+  background: var(--card);
+  border: 2px solid var(--ink);
+  display: grid; place-items: center;
+  font-size: 3rem; line-height: 1;
+  overflow: hidden;
+}
+.t-photo.photo { border: 2px solid var(--ink); }
+.t-name { font-weight: 700; font-size: 1.45rem; line-height: 1.25; letter-spacing: .02em; align-self: end; }
+.t-name small { font-size: .7em; margin-left: .25em; color: var(--shu); white-space: nowrap; }
+.t-hint { font-size: .9rem; line-height: 1.45; color: var(--ink-soft); }
+.t-hint span { display: inline-block; }
+.t-best { font-size: .9rem; color: var(--ai); font-weight: 700; }
+
+/* 遊び方：回覧板のようなご案内 */
+.howto {
+  background: var(--card);
+  border: 2px dashed var(--ink);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin: 0;
+  list-style: none;
+  display: flex; flex-direction: column; gap: 10px;
+  counter-reset: step;
+}
+.howto li { display: grid; grid-template-columns: 1.9rem 1fr; gap: 10px; align-items: start; font-size: 1rem; line-height: 1.65; }
+.howto li::before {
+  counter-increment: step;
+  content: counter(step);
+  width: 1.9rem; height: 1.9rem;
+  border-radius: 50%;
+  background: var(--shu-fill); color: var(--cream);
+  font-family: var(--display); font-weight: 400;
+  display: grid; place-items: center;
+}
+.howto b { color: var(--shu); }
+
+/* ---------- 進み具合 ---------- */
+.progress { display: flex; align-items: center; gap: 10px; }
+.progress-count { margin: 0; font-size: 1.1rem; font-weight: 700; white-space: nowrap; display: flex; align-items: center; gap: .3em; }
+.progress-count b {
+  font-family: var(--display); font-weight: 400;
+  font-size: 1.3rem;
+  width: 2.1rem; height: 2.1rem; border-radius: 50%;
+  display: inline-grid; place-items: center;
+  background: var(--shu-fill); color: var(--cream);
+}
+.progress-count span { font-weight: 400; margin-left: .2em; }
+.progress::after { content: ""; flex: 1; height: 3px; background: var(--ink); }
+
+/* ---------- 品物の札 ---------- */
+.board { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.board.single { grid-template-columns: 1fr; }
+.sign {
+  --tone: var(--ai);
+  container-type: inline-size;
+  position: relative;
+  min-width: 0;
+  background: var(--card);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius);
+  box-shadow: var(--offset) var(--offset) 0 var(--tone);
+  padding: 0 8px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  overflow: hidden;
+}
+.sign.ask { --tone: var(--shu-fill); }
+.sign.foreign { --tone: #5b3a73; }
+/* 札の上の見出し帯：色だけでなく文字でも区別する */
+.sign-tab {
+  align-self: stretch;
+  margin: 0 -8px 2px;
+  background: var(--tone);
+  color: var(--cream);
+  font-weight: 700;
+  font-size: 1rem; letter-spacing: .1em;
+  line-height: 1.2;
+  padding: .3em .4em;
+}
+
+/* 写真の額。年の札と、答えたあとの判子を写真の上に重ねる */
+.sign-icon {
+  container-type: inline-size;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  aspect-ratio: 1;
+  max-width: 100%;
+  border-radius: 8px;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  display: grid; place-items: center;
+  font-size: 3.5rem; font-size: min(7rem, 40cqi); line-height: 1;
+}
+.item-img { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+.era {
+  position: absolute; left: 0; top: 0; z-index: 1;
+  background: var(--karashi);
+  color: var(--ink);
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.3;
+  padding: .12em .55em .18em;
+  border-right: 2px solid var(--ink);
+  border-bottom: 2px solid var(--ink);
+  border-radius: 0 0 8px 0;
+  white-space: nowrap;
+}
+.hanko {
+  position: absolute; right: 5%; bottom: 5%; z-index: 2;
+  width: 50%; aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgba(255, 250, 240, .92);
+  border: 5px double var(--shu);
+  color: var(--shu);
+  display: grid; place-items: center;
+  font-weight: 700;
+  font-size: 1.1rem; font-size: min(1.8rem, 15cqi);
+  line-height: 1.1;
+  text-align: center;
+  transform: rotate(-6deg);
+  animation: hanko .35s cubic-bezier(.3, 1.6, .5, 1);
+}
+.hanko.miss { border-color: var(--ai); color: var(--ai); font-size: .95rem; font-size: min(1.4rem, 12.5cqi); }
+@keyframes hanko { from { transform: rotate(-6deg) scale(1.8); opacity: 0; } }
+.sign-name { margin: 0; font-weight: 700; font-size: 1.25rem; line-height: 1.3; text-wrap: balance; letter-spacing: .02em; }
+.sign-sub { margin: 0; font-size: .85rem; line-height: 1.45; color: var(--ink-soft); text-wrap: balance; }
+.usd {
+  display: flex; flex-direction: column; align-items: center;
+  border: 2px solid var(--ink); border-radius: 8px; padding: .1em .6em;
+  font-size: .85rem; line-height: 1.4;
+}
+.usd b { font-size: 1.2rem; color: #5b3a73; }
+
+/* 値段：特売チラシの赤い数字。桁が多いほど小さくして札からはみ出さないようにする */
+.tag {
+  margin-top: auto;
+  max-width: 100%;
+  font-family: var(--display); font-weight: 400;
+  color: var(--shu);
+  font-size: 1.5rem; font-size: min(2.1rem, 21cqi);
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  transform-origin: 50% 0;
+}
+.tag.mid { font-size: 1.25rem; font-size: min(1.8rem, 16.5cqi); }
+.tag.long { font-size: 1rem; font-size: min(1.45rem, 12.5cqi); }
+.tag small { font-family: var(--font); font-weight: 700; font-size: .5em; margin-left: .1em; }
+.tag .approx { font-family: var(--font); font-weight: 700; font-size: .48em; margin-right: .1em; }
+.tag.hidden-price {
+  background: var(--karashi); color: var(--ink);
+  border: 2px solid var(--ink); border-radius: 8px;
+  padding: 0 .5em;
+  letter-spacing: .1em;
+}
+.tag.flip { animation: flip .55s ease-out; }
+@keyframes flip { 0% { transform: rotateX(90deg); } 60% { transform: rotateX(-12deg); } 100% { transform: rotateX(0); } }
+
+/* 1枚だけの問題は、写真を札の7割の幅まで大きくする */
+.board.single .sign-icon { width: 72%; }
+.board.single .sign-name { font-size: 1.5rem; }
+
+/* 「大きい字」のときは、写真を左・文字を右にした横長の札を縦に積む */
+:root.big .board { grid-template-columns: 1fr; }
+:root.big .sign {
+  display: grid;
+  grid-template-columns: 44% 1fr;
+  column-gap: 12px; row-gap: 6px;
+  align-items: center; align-content: start;
+  justify-items: start;
+  text-align: left;
+  padding: 0 12px 12px;
+}
+:root.big .sign > .sign-tab { grid-column: 1 / -1; margin: 0 -12px 4px; justify-self: stretch; text-align: center; }
+:root.big .sign > .sign-icon { grid-column: 1; grid-row: 2 / span 4; align-self: center; width: 100%; font-size: min(5rem, 22cqi); }
+:root.big .sign > :not(.sign-icon):not(.sign-tab) { grid-column: 2; }
+:root.big .sign-name { font-size: 1.35rem; }
+:root.big .usd { align-items: flex-start; }
+:root.big .tag { font-size: min(2rem, 11cqi); }
+:root.big .tag.mid { font-size: min(1.8rem, 9cqi); }
+:root.big .tag.long { font-size: min(1.45rem, 7cqi); }
+
+/* ---------- 問いかけと答え（画面の下に固定） ---------- */
+.actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  margin-inline: -16px;
+  padding: 16px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  background:
+    repeating-linear-gradient(90deg, var(--shu-fill) 0 18px, var(--cream) 18px 36px) top / 100% 8px no-repeat,
+    var(--ticket);
+  border-top: 3px solid var(--ink);
+  box-shadow: 0 -8px 16px rgba(38, 32, 27, .18);
+  display: flex; flex-direction: column; gap: 10px;
+}
+.question {
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.5;
+  text-align: center;
+  text-wrap: balance;
+}
+.question b { color: var(--shu); white-space: nowrap; }
+.answers { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.answers.three { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.answers.one { grid-template-columns: 1fr; }
+/* 5けた以上の値段や大きい字のときは、3つのボタンを縦に並べる */
+.answers.three.tall, :root.big .answers.three { grid-template-columns: 1fr; }
+.answers.three.tall .btn-price, :root.big .answers.three .btn-price { min-height: 3rem; font-size: 1.4rem; }
+.big-btn {
+  font-weight: 700;
+  font-size: 2rem;
+  letter-spacing: .1em;
+  border: 3px solid var(--ink);
+  border-radius: var(--radius);
+  min-height: 4.3rem;
+  padding: .15em .4em;
+  display: flex; align-items: center; justify-content: center; gap: .3em;
+  box-shadow: var(--offset) var(--offset) 0 var(--ink);
+  transition: transform .08s, box-shadow .08s, filter .08s, opacity .2s;
+}
+.big-btn:active, .big-btn.pressed { transform: translate(var(--offset), var(--offset)); box-shadow: 0 0 0 var(--ink); filter: brightness(.9); }
+/* 押したボタンにからし色の枠と ✓ を出して「押せた」とわかるようにする */
+.big-btn.chosen { transform: translate(var(--offset), var(--offset)); box-shadow: 0 0 0 var(--ink); outline: 5px solid var(--karashi); outline-offset: 3px; }
+.big-btn.chosen::after { content: "✓"; margin-left: .15em; font-size: .8em; }
+/* 出てすぐの「つぎへ」は、続けて押してしまわないよう少しのあいだ押せない */
+.big-btn.wait { opacity: .45; }
+.big-btn .arrow { font-size: .65em; }
+.btn-high, .btn-low { white-space: nowrap; }
+:root.big .btn-high, :root.big .btn-low { font-size: 1.7rem; letter-spacing: .04em; padding-inline: .2em; gap: .2em; }
+.btn-high { background: var(--shu-fill); color: var(--cream); }
+.btn-low { background: var(--ai); color: var(--cream); }
+.btn-go { background: var(--karashi); width: 100%; font-size: 1.6rem; }
+.btn-sub { background: var(--card); width: 100%; font-family: var(--font); font-weight: 700; font-size: 1.25rem; min-height: 3.6rem; letter-spacing: .04em; }
+.btn-price {
+  font-family: var(--display); font-weight: 400;
+  background: var(--card);
+  color: var(--shu);
+  font-size: 1.45rem;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+  min-height: 3.6rem;
+  padding-inline: .15em;
+  white-space: nowrap;
+}
+.btn-price.mid { font-size: 1.05rem; }
+.btn-price small { font-family: var(--font); font-weight: 700; font-size: .6em; }
+
+/* ---------- 答え合わせ ---------- */
+.reveal {
+  display: flex; flex-direction: column; gap: 10px;
+  background: var(--card);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--offset) var(--offset) 0 var(--ink);
+}
+.verdict { margin: 0; font-weight: 700; font-size: 2rem; line-height: 1.2; color: var(--shu); letter-spacing: .06em; }
+.verdict.miss { color: var(--ai); }
+.memo-you { margin: 0; font-size: 1rem; color: var(--ink-soft); }
+.memo-compare { margin: 0; font-size: 1.1rem; line-height: 1.6; }
+.memo-compare b { color: var(--shu); }
+.nw { white-space: nowrap; }
+.memo-calc { margin: 0; font-size: .95rem; color: var(--ink-soft); }
+.memo-head {
+  margin: 4px 0 0;
+  display: inline-flex; align-self: flex-start;
+  font-size: .9rem; letter-spacing: .1em;
+  color: var(--cream); background: var(--ai);
+  padding: .15em .8em; border-radius: 4px;
+}
+.memo-note { margin: 0; font-size: 1.05rem; line-height: 1.8; }
+/* 値段のうつりかわり：品書きのように、年と値段を点線でつなぐ */
+.timeline { border-top: 3px double var(--ink); padding-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.timeline-title { margin: 0; font-size: .95rem; color: var(--ink-soft); }
+.tl { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.tl li {
+  display: flex; align-items: baseline; gap: 6px;
+  padding: .2em .5em; border-radius: 6px;
+  font-variant-numeric: tabular-nums;
+}
+.tl li span { font-size: .95rem; white-space: nowrap; }
+.tl li span small { font-size: .95rem; color: var(--wakatake); font-weight: 700; }
+.tl li i { flex: 1; min-width: 1em; border-bottom: 3px dotted rgba(38, 32, 27, .35); transform: translateY(-.3em); }
+.tl li b { font-size: 1.2rem; white-space: nowrap; }
+.tl li.cur { background: #f9e3d7; }
+.tl li.cur b { color: var(--shu); }
+.tl li.now b { color: var(--wakatake); }
+.tl-note { margin: 0; font-size: .9rem; color: var(--ink-soft); }
+
+/* ---------- 結果＝認定証 ---------- */
+.cert {
+  position: relative;
+  background: var(--card);
+  border: 3px solid var(--ink);
+  border-radius: 6px;
+  padding: 10px;
+  box-shadow: var(--offset) var(--offset) 0 var(--ink);
+}
+.cert-inner {
+  border: 5px double var(--gold);
+  border-radius: 4px;
+  padding: 18px 14px 20px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  text-align: center;
+}
+.cert-title { margin: 0; font-weight: 700; font-size: 1.6rem; letter-spacing: .5em; text-indent: .5em; }
+.cert-score { margin: 0; font-size: 1.15rem; font-weight: 700; }
+.cert-score b { font-family: var(--display); font-weight: 400; font-size: 2.6em; color: var(--shu); line-height: 1; padding-inline: .05em; }
+.cert-rank { margin: 0; font-size: 1.05rem; line-height: 1.6; }
+.cert-rank b { display: block; font-weight: 700; font-size: 1.7rem; color: var(--ai); line-height: 1.3; margin-block: 2px; }
+.cert-msg { margin: 0; font-size: 1rem; line-height: 1.7; color: var(--ink-soft); }
+.seal {
+  align-self: flex-end;
+  margin-top: 2px;
+  width: 3.4rem; height: 3.4rem;
+  border: 3px solid var(--shu); border-radius: 6px;
+  color: var(--shu);
+  font-weight: 700; font-size: .85rem; line-height: 1.15;
+  display: grid; place-items: center; text-align: center;
+  transform: rotate(-8deg);
+  opacity: .9;
+}
+.finds-title { margin: 0; font-weight: 700; font-size: 1.45rem; display: flex; align-items: center; gap: 10px; }
+.finds-title::after { content: ""; flex: 1; height: 3px; background: var(--ink); }
+.finds-lead { margin: 2px 0 0; font-size: 1rem; }
+.finds { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr; gap: 12px; }
+.find {
+  background: var(--card);
+  border: 2px solid var(--ink);
+  border-radius: 10px; padding: 10px;
+  display: grid; grid-template-columns: 5rem 1fr; gap: 2px 12px; align-items: center;
+  min-width: 0;
+}
+.find-icon {
+  grid-row: span 3;
+  width: 5rem; height: 5rem;
+  border-radius: 8px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  display: grid; place-items: center;
+  font-size: 2.8rem; line-height: 1;
+  overflow: hidden;
+}
+.find-year { margin: 0; font-size: .9rem; color: var(--ink-soft); }
+.find-name { margin: 0; font-weight: 700; font-size: 1.1rem; line-height: 1.35; min-width: 0; }
+.find-price { margin: 0; font-size: 1rem; line-height: 1.45; font-variant-numeric: tabular-nums; }
+.find-price b { font-family: var(--display); font-weight: 400; color: var(--shu); font-size: 1.25em; }
+.find-price .now { display: inline-block; color: var(--wakatake); font-weight: 700; }
+.result-actions { display: grid; grid-template-columns: 1fr; gap: 14px; }
+
+.source { font-size: .9rem; line-height: 1.7; color: var(--ink-soft); }
+.source summary { cursor: pointer; min-height: 2.6rem; display: flex; align-items: center; text-decoration: underline; text-underline-offset: .2em; color: var(--ink); }
+.source p { margin: 4px 0 0; }
+
+/* ---------- 「やめる」の確認 ---------- */
+.modal { position: fixed; inset: 0; z-index: 60; background: rgba(38, 32, 27, .6); display: grid; place-items: center; padding: 16px; }
+.modal-box {
+  width: min(100%, 26rem);
+  background: var(--card);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius);
+  padding: 20px 16px 18px;
+  display: flex; flex-direction: column; gap: 14px;
+  box-shadow: var(--offset) var(--offset) 0 var(--ink);
+}
+.modal-title { margin: 0; font-size: 1.25rem; font-weight: 700; line-height: 1.5; text-align: center; }
+
+/* ---------- 連続正解のお祝い ---------- */
+.celebrate { position: fixed; inset: 0; z-index: 50; pointer-events: none; overflow: hidden; }
+.celebrate .shade { position: absolute; inset: 0; background: rgba(38, 32, 27, .25); animation: fadein .2s ease-out; }
+@keyframes fadein { from { opacity: 0; } }
+.kusudama {
+  position: absolute; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 8px);
+  width: 12rem; height: 22rem; margin-left: -6rem;
+  transform: scale(.85); transform-origin: 50% 0;
+}
+.kusudama .string { position: absolute; left: 50%; top: 0; width: 3px; height: 1.6rem; margin-left: -1.5px; background: var(--ink); }
+.kusudama .half {
+  position: absolute; top: 1.4rem; width: 6rem; height: 12rem;
+  background:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.18) 0 8px, transparent 8px 16px),
+    radial-gradient(circle at 70% 30%, #f5d77c, var(--karashi) 55%, #9c7414);
+  box-shadow: inset 0 0 0 3px rgba(38, 32, 27, .5);
+}
+.kusudama .half.l { left: 0; border-radius: 6rem 0 0 6rem; transform-origin: 100% 0; animation: openL .6s .15s ease-out forwards; }
+.kusudama .half.r { right: 0; border-radius: 0 6rem 6rem 0; transform-origin: 0 0; animation: openR .6s .15s ease-out forwards;
+  background:
+    repeating-linear-gradient(-45deg, rgba(255,255,255,.18) 0 8px, transparent 8px 16px),
+    radial-gradient(circle at 30% 30%, #d4604a, var(--shu-fill) 55%, #6b1a0f); }
+@keyframes openL { to { transform: rotate(38deg); } }
+@keyframes openR { to { transform: rotate(-38deg); } }
+.kusudama .banner {
+  position: absolute; left: 50%; top: 2.6rem; width: 4.6rem; margin-left: -2.3rem;
+  background: var(--card); color: var(--shu);
+  border: 3px solid var(--shu);
+  writing-mode: vertical-rl; text-orientation: upright;
+  font-weight: 700; font-size: 1.9rem; letter-spacing: .12em;
+  padding: .5em 0; display: flex; align-items: center; justify-content: flex-start;
+  transform-origin: 50% 0; transform: scaleY(0);
+  animation: drop .55s .45s ease-out forwards;
+  box-shadow: var(--offset) var(--offset) 0 var(--ink);
+}
+.kusudama .banner .iwai { color: var(--ink); margin-bottom: .3em; }
+@keyframes drop { to { transform: scaleY(1); } }
+.toast {
+  position: absolute; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 16px);
+  transform: translateX(-50%);
+  background: var(--shu-fill); color: var(--cream);
+  font-weight: 700; font-size: 1.7rem; letter-spacing: .08em;
+  padding: .4em 1.1em; border-radius: 12px;
+  border: 3px solid var(--ink);
+  box-shadow: var(--offset) var(--offset) 0 var(--ink);
+  animation: pop .4s cubic-bezier(.3, 1.6, .5, 1);
+  white-space: nowrap;
+}
+@keyframes pop { from { transform: translateX(-50%) scale(.4); opacity: 0; } }
+.confetti i {
+  position: absolute; top: -20px;
+  width: 10px; height: 16px;
+  animation: fall linear forwards;
+}
+@keyframes fall { to { transform: translate3d(var(--dx), 110vh, 0) rotate(var(--rot)); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .tag.flip, .hanko, .toast, .celebrate .shade { animation: none; }
+  .kusudama .half, .kusudama .banner { animation-duration: .01s; animation-delay: 0s; }
+  .big-btn, .ticket, .chip, .brand { transition: none; }
+}
+</style>
+
+<div class="awning" aria-hidden="true"></div>
+<div class="app">
+  <header class="topbar">
+    <button class="brand" id="btn-home" type="button" aria-label="はじめの画面へ">昭和の目利き</button>
+    <div class="tools">
+      <button class="chip" id="btn-font" type="button" aria-pressed="false">大きい字</button>
+      <button class="chip" id="btn-sound" type="button" aria-pressed="true">音あり</button>
+    </div>
+  </header>
+
+  <!-- はじめの画面 -->
+  <section id="screen-start" class="stack">
+    <figure class="tv">
+      <video id="top-video" src="画像/昭和の目利き_トップ動画_v2.mp4" poster="画像/昭和の目利き_トップ動画_ポスター.jpg"
+        muted loop playsinline preload="auto" aria-label="昭和の教室や町なみの映像（字幕つき）"></video>
+      <button class="tv-sound" id="btn-video-sound" type="button" aria-pressed="false">動画の音を出す</button>
+    </figure>
+    <div class="hero">
+      <p class="hero-ribbon">なつかしの値段あて</p>
+      <h1 class="hero-title">昭和の<br>目利き</h1>
+      <p class="hero-sub">高い？ 安い？</p>
+      <p class="hero-lead" id="hero-lead">あのころの値段、覚えていますか？</p>
+      <p class="burst" id="burst" aria-hidden="true"></p>
+    </div>
+    <h2 class="era-title">時代を選んでください</h2>
+    <div class="eras" id="eras"></div>
+    <ol class="howto">
+      <li><span>2つの品物の値段をくらべて、<b>「高い」</b>か<b>「安い」</b>を押します。</span></li>
+      <li><span>全部で<b>10問</b>。時間の制限はありません。</span></li>
+      <li><span>値段を<b>3つから選ぶ</b>問題や、<b>アメリカ</b>とくらべる問題も出ます。</span></li>
+    </ol>
+  </section>
+
+  <!-- 出題 -->
+  <section id="screen-play" class="stack" hidden>
+    <div class="progress" id="progress">
+      <p class="progress-count">第<b id="q-num">1</b>問<span>／ 全10問</span></p>
+    </div>
+    <div class="board" id="board"></div>
+    <section class="reveal" id="reveal" hidden aria-live="polite"></section>
+    <div class="actions">
+      <p class="question" id="question"></p>
+      <div class="answers" id="answers"></div>
+    </div>
+  </section>
+
+  <!-- 結果 -->
+  <section id="screen-result" class="stack" hidden></section>
+
+  <details class="source" id="source">
+    <summary>値段の出典</summary>
+    <p>値段は主に総務省統計局「小売物価統計調査」の東京都区部の年平均（昭和の各年と令和7年）です。重さや量の単位が変わった品物は、同じ量に換算して「約」をつけています。発売時の値段は各社の発表や報道、アメリカの値段は当時の公定価格や平均価格を、その年の為替レート（昭和46年までは1ドル＝360円）で円に直しました。銭湯は東京都の料金（令和8年8月改定）、映画のいまの値段は全国平均です。</p>
+  </details>
+</div>
+
+<div class="modal" id="confirm" hidden role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+  <div class="modal-box">
+    <p class="modal-title" id="confirm-title">ゲームをやめて、<br>はじめの画面にもどりますか？</p>
+    <button class="big-btn btn-go" id="confirm-no" type="button">つづける</button>
+    <button class="big-btn btn-sub" id="confirm-yes" type="button">やめて もどる</button>
+  </div>
+</div>
+
+<div class="celebrate" id="celebrate" hidden></div>
+
+<script>
+(() => {
+  "use strict";
+
+  const DATA = {"items":[{"id":"rice","icon":"🌾","cat":"たべもの","name":"お米","label":"お米10kg","sub":"10kg","p":{"1955":1100,"1958":1000,"1960":990,"1963":1100,"1965":1400,"1968":1700,"1970":1900,"1973":2070,"1975":2990,"1978":4030,"1980":4142,"1983":4484,"1985":4788,"1988":4774},"cnt":"袋","note":"米屋さんが自転車で配達してくれた時代。令和7年はお米の値上がりが大きな話題になりました。","sy":{"1955":"1kgの値段を10倍","1958":"1kgの値段を10倍","1960":"1kgの値段を10倍","1963":"1kgの値段を10倍","1965":"1kgの値段を10倍","1968":"1kgの値段を10倍","1970":"1kgの値段を10倍"},"ap":[1955,1958,1960,1963,1965,1968,1970],"now":9856,"nowNote":"コシヒカリ5kgの2袋分","img":"rice.webp"},{"id":"bread","icon":"🍞","cat":"たべもの","name":"食パン","label":"食パン（約400g）","sub":"約400g・1斤ほど","p":{"1955":25,"1958":28,"1960":31,"1963":35,"1965":38,"1968":39,"1970":46,"1973":66,"1975":95,"1978":120,"1980":130,"1983":140,"1985":150,"1988":150},"cnt":"斤","note":"学校給食のコッペパンでもおなじみ。昭和30年代は1斤30円前後でした。","ap":[1963,1965,1968,1970,1973,1975,1978,1980,1983,1985,1988],"now":214,"nowNote":"1kgの値段から換算","img":"bread.webp"},{"id":"beef","icon":"🥩","cat":"たべもの","name":"牛肉（ロース）","label":"牛肉ロース100g","sub":"100g","p":{"1955":66,"1958":75,"1960":87,"1963":128,"1965":147,"1968":228,"1970":237,"1973":342,"1975":454,"1978":535,"1980":574,"1983":580,"1985":623,"1988":643},"cnt":"パック","note":"すき焼きはとっておきのごちそう。牛肉は豚肉の2倍ほどの値段でした。","ap":[1955,1958,1960],"now":937,"nowNote":"国産ロース","img":"beef.webp"},{"id":"pork","icon":"🐖","cat":"たべもの","name":"豚肉（ロース）","label":"豚肉ロース100g","sub":"100g","p":{"1955":58,"1958":54,"1960":73,"1963":84,"1965":87,"1968":104,"1970":115,"1973":139,"1975":190,"1978":197,"1980":188,"1983":215,"1985":210,"1988":199},"cnt":"パック","note":"とんかつやしょうが焼きで食卓へ。昭和50年代からは、ほとんど値上がりしませんでした。","ap":[1955,1958,1960],"img":"pork.webp"},{"id":"chicken","icon":"🍗","cat":"たべもの","name":"鶏肉","label":"鶏肉100g","sub":"100g","p":{"1955":44,"1958":47,"1960":48,"1963":72,"1965":72,"1968":74,"1970":77,"1973":80,"1975":99,"1978":103,"1980":114,"1983":119,"1985":115,"1988":105},"cnt":"パック","note":"ブロイラーが広まって、鶏肉は値上がりしにくい肉になりました。","ap":[1955,1958,1960],"now":153,"nowNote":"もも肉","img":"chicken.webp"},{"id":"maguro","icon":"🐟","cat":"たべもの","name":"まぐろ（刺身用）","label":"まぐろの刺身用100g","sub":"100g","p":{"1955":27,"1958":31,"1960":30,"1963":64,"1965":75,"1968":105,"1970":127,"1973":186,"1975":295,"1978":334,"1980":411,"1983":401,"1985":426,"1988":418},"cnt":"さく","note":"お祝いの日の食卓に。魚屋さんで切ってもらいました。","ap":[1955,1958,1960],"now":508,"nowNote":"赤身","img":"maguro.webp"},{"id":"sanma","icon":"🐠","cat":"たべもの","name":"さんま","label":"さんま1尾","sub":"約150gで換算","p":{"1955":11,"1958":11,"1960":13,"1963":18,"1965":34,"1968":63,"1970":95,"1973":86,"1975":90,"1978":200,"1980":140,"1983":180,"1985":140,"1988":170},"cnt":"尾","note":"七輪で焼いた秋の味覚。近ごろは不漁で値上がりしています。","ap":[1955,1958,1960,1963,1965,1968,1970,1973,1975,1978,1980,1983,1985,1988],"now":293,"nowNote":"100gの値段から換算","img":"sanma.webp"},{"id":"egg","icon":"🥚","cat":"たべもの","name":"卵10個","label":"卵10個","sub":"1個約60gで換算","p":{"1955":140,"1958":140,"1960":140,"1963":150,"1965":130,"1968":140,"1970":140,"1973":160,"1975":220,"1978":190,"1980":230,"1983":200,"1985":210,"1988":150},"cnt":"パック","note":"卵は「物価の優等生」。昭和30年代から、値段がほとんど変わっていません。","ap":[1955,1958,1960,1963,1965,1968,1970,1973,1975,1978,1980,1983,1985,1988],"now":307,"nowNote":"10個入りパック","img":"egg.webp"},{"id":"milk","icon":"🥛","cat":"たべもの","name":"牛乳（配達）","label":"配達の牛乳びん1本","sub":"びん1本","p":{"1955":14,"1958":14,"1960":14,"1963":18,"1965":20,"1968":21,"1970":25,"1973":33,"1975":48,"1978":54,"1980":56,"1983":57,"1985":58,"1988":59},"cnt":"本","note":"毎朝、牛乳屋さんが玄関の箱に届けてくれました。昭和47年から、びんが180ccから200ccに。","sy":{"1955":"びん1本・180cc","1958":"びん1本・180cc","1960":"びん1本・180cc","1963":"びん1本・180cc","1965":"びん1本・180cc","1968":"びん1本・180cc","1970":"びん1本・180cc","1973":"びん1本・200cc","1975":"びん1本・200cc","1978":"びん1本・200cc","1980":"びん1本・200cc","1983":"びん1本・200cc","1985":"びん1本・200cc","1988":"びん1本・200cc"},"img":"milk.webp"},{"id":"butter","icon":"🧈","cat":"たべもの","name":"バター","label":"バター1箱（225g）","sub":"225g","p":{"1955":172,"1958":108,"1960":160,"1963":180,"1965":180,"1968":180,"1970":180,"1973":205,"1975":284,"1978":343,"1980":343,"1983":375,"1985":374,"1988":362},"cnt":"箱","note":"昭和38年から45年まで、ずっと180円。パンにぬるのはマーガリンという家も多くありました。","now":567,"nowNote":"200g入り","noRatio":true,"img":"butter.webp"},{"id":"tofu","icon":"🍲","cat":"たべもの","name":"豆腐","label":"豆腐1丁","sub":"約300gで換算","p":{"1955":16,"1958":14,"1960":14,"1963":21,"1965":23,"1968":23,"1970":28,"1973":42,"1975":54,"1978":57,"1980":63,"1983":69,"1985":78,"1988":78},"cnt":"丁","note":"ラッパの音で豆腐屋さんがやってきます。鍋を持って買いに行きました。","ap":[1955,1958,1960,1963,1965,1968,1970,1973,1975,1978,1980,1983,1985,1988],"now":85,"nowNote":"1kgの値段から換算","img":"tofu.webp"},{"id":"cabbage","icon":"🥬","cat":"たべもの","name":"キャベツ","label":"キャベツ1kg","sub":"1kg・およそ1玉","p":{"1955":26,"1958":28,"1960":32,"1963":33,"1965":46,"1968":37,"1970":71,"1973":75,"1975":81,"1978":133,"1980":217,"1983":153,"1985":175,"1988":210},"cnt":"玉","note":"とんかつの付け合わせに欠かせない野菜。天気しだいで値段が大きく動きます。","ap":[1955,1958,1960],"now":250,"img":"cabbage.webp"},{"id":"daikon","icon":"🌿","cat":"たべもの","name":"だいこん","label":"だいこん1kg","sub":"1kg・およそ1本","p":{"1955":14,"1958":21,"1960":22,"1963":29,"1965":37,"1968":38,"1970":74,"1973":91,"1975":98,"1978":147,"1980":172,"1983":167,"1985":169,"1988":168},"cnt":"本","note":"冬は軒先に干して、たくあん漬けに。","ap":[1955,1958,1960],"now":242,"img":"daikon.webp"},{"id":"potato","icon":"🥔","cat":"たべもの","name":"じゃがいも","label":"じゃがいも1kg","sub":"1kg","p":{"1955":22,"1958":23,"1960":32,"1963":45,"1965":47,"1968":55,"1970":94,"1973":106,"1975":136,"1978":156,"1980":198,"1983":209,"1985":199,"1988":231},"cnt":"袋","note":"昭和30年代は「男爵」が定番。肉じゃが、コロッケ、カレーに。","now":508,"img":"potato.webp"},{"id":"onion","icon":"🧅","cat":"たべもの","name":"たまねぎ","label":"たまねぎ1kg","sub":"1kg","p":{"1955":40,"1958":35,"1960":30,"1963":73,"1965":65,"1968":80,"1970":96,"1973":110,"1975":108,"1978":134,"1980":156,"1983":170,"1985":164,"1988":193},"cnt":"袋","note":"カレーライスが家庭に広まるとともに、たまねぎも食卓の常連になりました。","ap":[1955,1958,1960,1963,1965,1968,1970],"now":408,"img":"onion.webp"},{"id":"tomato","icon":"🍅","cat":"たべもの","name":"トマト","label":"トマト1kg","sub":"1kg","p":{"1955":54,"1958":60,"1960":76,"1963":170,"1965":200,"1968":200,"1970":230,"1973":237,"1975":356,"1978":404,"1980":444,"1983":477,"1985":525,"1988":556},"cnt":"袋","note":"昔のトマトは青くささが強く、砂糖をかけて食べる家もありました。","ap":[1955,1958,1960,1963,1965,1968,1970],"now":974,"img":"tomato.webp"},{"id":"apple","icon":"🍎","cat":"たべもの","name":"りんご","label":"りんご1kg","sub":"1kg","p":{"1955":92,"1958":72,"1960":84,"1963":111,"1965":147,"1968":148,"1970":152,"1973":179,"1975":304,"1978":409,"1980":522,"1983":487,"1985":543,"1988":444},"cnt":"袋","note":"昭和50年ごろまでは「国光」が主役。統計でも昭和51年から「ふじ」に切りかわりました。","sy":{"1955":"1kg・国光","1958":"1kg・国光","1960":"1kg・国光","1963":"1kg・国光","1965":"1kg・国光","1968":"1kg・国光","1970":"1kg・国光","1973":"1kg・国光","1975":"1kg・国光","1978":"1kg・ふじ","1980":"1kg・ふじ","1983":"1kg・ふじ","1985":"1kg・ふじ","1988":"1kg・ふじ"},"ap":[1955,1958,1960],"now":909,"img":"apple.webp"},{"id":"mikan","icon":"🍊","cat":"たべもの","name":"みかん","label":"みかん1kg","sub":"1kg","p":{"1955":86,"1958":140,"1960":100,"1963":153,"1965":154,"1968":197,"1970":198,"1973":151,"1975":256,"1978":324,"1980":316,"1983":360,"1985":451,"1988":428},"cnt":"袋","note":"こたつにみかんは冬の定番。箱で買う家も多くありました。","ap":[1955,1958,1960],"now":991,"img":"mikan.webp"},{"id":"suika","icon":"🍉","cat":"たべもの","name":"すいか","label":"すいか1kg","sub":"1kgあたり","p":{"1955":28,"1958":32,"1960":45,"1963":139,"1965":98,"1968":119,"1970":335,"1973":225,"1975":327,"1978":371,"1980":356,"1983":395,"1985":331,"1988":339},"cnt":"切れ","note":"井戸水やたらいで冷やして、縁側で食べました。","ap":[1955,1958,1960],"now":602,"img":"suika.webp"},{"id":"banana","icon":"🍌","cat":"たべもの","name":"バナナ","label":"バナナ1kg","sub":"1kg・ひと房ほど","p":{"1965":264,"1968":221,"1970":193,"1973":139,"1975":179,"1978":182,"1980":220,"1983":278,"1985":286,"1988":232},"cnt":"房","note":"昭和38年に輸入が自由化されるまで、バナナはお見舞いに持っていく高級品。いまも値段はあまり変わりません。","now":353,"img":"banana.webp"},{"id":"sugar","icon":"🍬","cat":"たべもの","name":"砂糖","label":"砂糖1kg","sub":"1kg","p":{"1955":150,"1958":140,"1960":150,"1963":167,"1965":130,"1968":129,"1970":141,"1973":158,"1975":293,"1978":233,"1980":267,"1983":255,"1985":261,"1988":254},"cnt":"袋","note":"昭和30年代でも1kg150円ほど。いまも300円しないので、値段はほとんど変わっていません。","ap":[1955,1958,1960],"now":279,"img":"sugar.webp"},{"id":"salt","icon":"🧂","cat":"たべもの","name":"塩","label":"塩1kg","sub":"1kg","p":{"1955":20,"1958":20,"1960":21,"1963":20,"1965":20,"1968":20,"1970":20,"1973":20,"1975":20,"1978":60,"1980":60,"1983":75,"1985":75,"1988":75},"cnt":"袋","note":"塩は国の専売品。昭和30年から50年まで、ずっと1kg20円ほどでした。","now":128,"img":"salt.webp"},{"id":"shoyu","icon":"🥫","cat":"たべもの","name":"しょう油","label":"しょう油2リットル（びん）","sub":"2リットルびん","p":{"1955":162,"1958":172,"1960":171,"1963":199,"1965":219,"1968":250,"1970":259,"1973":325,"1975":448,"1978":499,"1980":552},"cnt":"本","note":"大きなびんで買い、空きびんは酒屋さんに返すのがふつうでした。","img":"shoyu.webp"},{"id":"miso","icon":"🥣","cat":"たべもの","name":"みそ","label":"みそ1kg","sub":"1kg","p":{"1955":67,"1958":76,"1960":79,"1963":96,"1965":116,"1968":132,"1970":146,"1973":205,"1975":250,"1978":291,"1980":303,"1983":333,"1985":336,"1988":328},"cnt":"袋","note":"昔は量り売りで、味噌屋さんが木の樽からすくってくれました。","ap":[1955,1958,1960],"now":511,"nowNote":"750gの値段から換算","img":"miso.webp"},{"id":"mayo","icon":"🥗","cat":"たべもの","name":"マヨネーズ","label":"マヨネーズ（300g）","sub":"300g・チューブ入り","p":{"1970":117,"1973":121,"1975":209,"1978":197,"1980":197,"1983":221,"1985":224,"1988":202},"cnt":"本","note":"サラダが食卓に広まるとともに、マヨネーズも欠かせない調味料になりました。","now":255,"nowNote":"1kgの値段から換算","img":"mayo.webp"},{"id":"youkan","icon":"🍡","cat":"たべもの","name":"ようかん","label":"練りようかん1本","sub":"1本約300gで換算","p":{"1955":92,"1958":92,"1960":94,"1963":86,"1965":110,"1968":120,"1970":130,"1973":220,"1975":270,"1978":340,"1980":350,"1983":390,"1985":390,"1988":400},"cnt":"本","note":"お茶うけや手みやげの定番でした。","ap":[1955,1958,1960,1963,1965,1968,1970,1973,1975,1978,1980,1983,1985,1988],"img":"youkan.webp"},{"id":"senbei","icon":"🍘","cat":"たべもの","name":"塩せんべい","label":"塩せんべい10枚","sub":"約100g","p":{"1955":37,"1958":28,"1960":28,"1963":34,"1965":38,"1968":47,"1970":50,"1973":54,"1975":85,"1978":87,"1980":93,"1983":106,"1985":104,"1988":112},"cnt":"袋","note":"お茶の間のおやつの定番。駄菓子屋さんのガラスびんにも並んでいました。","ap":[1955,1958,1960],"img":"senbei.webp"},{"id":"choco","icon":"🍫","cat":"たべもの","name":"板チョコ","label":"板チョコ1枚","sub":"1枚","p":{"1958":20,"1960":20,"1963":20,"1965":50,"1968":50,"1970":50,"1975":94},"cnt":"枚","note":"昭和30年代の板チョコは約20gで20円。昭和40年から、大きな板が50円になりました。","sy":{"1958":"1枚・約20g","1960":"1枚・約20g","1963":"1枚・約20g","1965":"1枚・約54g","1968":"1枚・約54g","1970":"1枚・約45g","1975":"1枚・50g"},"img":"choco.webp"},{"id":"unagi","icon":"🍱","cat":"たべもの","name":"うなぎの蒲焼き","label":"うなぎの蒲焼き100g","sub":"100g","p":{"1970":250,"1973":505,"1975":629,"1978":723,"1980":718,"1983":745,"1985":757,"1988":749},"cnt":"串","note":"土用の丑の日のごちそう。昭和45年の250円から、5年で2.5倍になりました。","now":1448,"nowNote":"国産","img":"unagi.webp"},{"id":"sencha","icon":"🍃","cat":"たべもの","name":"せん茶","label":"せん茶100g","sub":"100g","p":{"1955":59,"1958":61,"1960":62,"1963":84,"1965":112,"1968":140,"1970":185,"1973":258,"1975":331,"1978":428,"1980":456,"1983":524,"1985":527,"1988":521},"cnt":"袋","note":"来客にも家族にも、まずはお茶。茶筒にたっぷり入れておきました。","now":601,"img":"sencha.webp"},{"id":"instcoffee","icon":"☕","cat":"たべもの","name":"インスタントコーヒー","label":"インスタントコーヒー1びん","sub":"1びん","p":{"1965":255,"1968":509,"1970":494,"1973":494,"1975":656,"1978":1180,"1980":1064,"1983":1007,"1985":1061,"1988":877},"cnt":"びん","note":"昭和40年代、お湯を注ぐだけのコーヒーで、家でもコーヒーを楽しむようになりました。","sy":{"1965":"びん50g","1968":"びん150g","1970":"びん150g","1973":"びん150g","1975":"びん150g","1978":"びん150g","1980":"びん150g","1983":"びん150g","1985":"びん150g","1988":"びん150g"},"img":"instcoffee.webp"},{"id":"juice","icon":"🧃","cat":"たべもの","name":"オレンジジュース","label":"オレンジジュース（びん）","sub":"びん200cc","p":{"1958":45,"1960":45,"1963":45,"1965":45,"1968":45,"1978":60,"1980":61,"1983":70,"1985":70,"1988":70},"cnt":"本","note":"昭和33年から43年まで、ずっと1本45円。お祝いの席のごちそうでした。","sy":{"1958":"びん200cc","1960":"びん200cc","1963":"びん200cc","1965":"びん200cc","1968":"びん200cc","1978":"びん200cc・果汁10%","1980":"びん200cc・果汁10%","1983":"びん200cc・果汁10%","1985":"びん200cc・果汁10%","1988":"びん200cc・果汁10%"},"img":"juice.webp"},{"id":"sake","icon":"🍶","cat":"たべもの","name":"日本酒（2級）","label":"日本酒（2級）一升びん","sub":"一升びん・1.8リットル","p":{"1955":520,"1958":528,"1960":508,"1963":497,"1965":536,"1968":598,"1970":625,"1973":717,"1975":949,"1978":1080,"1980":1178,"1983":1295,"1985":1380,"1988":1380},"cnt":"本","note":"昔は特級・1級・2級の「等級」がありました。平成4年に廃止されています。","now":1076,"nowNote":"2リットルの紙パック","noRatio":true,"img":"sake.webp"},{"id":"beer","icon":"🍺","cat":"たべもの","name":"ビール","label":"ビール大びん1本","sub":"大びん633ml","p":{"1955":125,"1958":125,"1960":125,"1963":115,"1965":116,"1968":126,"1970":140,"1973":160,"1975":180,"1978":215,"1980":240,"1983":285,"1985":310,"1988":310},"cnt":"本","note":"昭和37年のビール大びんは、ラーメン2杯半ほどの値段。ぜいたくな飲みものでした。","img":"beer.webp"},{"id":"whisky","icon":"🥃","cat":"たべもの","name":"ウイスキー","label":"ウイスキー1本","sub":"1本","p":{"1955":340,"1958":330,"1960":330,"1963":300,"1965":340,"1968":340,"1970":340,"1973":500,"1975":600,"1978":620,"1980":800,"1983":870,"1985":900,"1988":900},"cnt":"本","note":"サラリーマンに親しまれた国産ウイスキー。トリスバーでハイボールが流行しました。","sy":{"1955":"640ml","1958":"640ml","1960":"640ml","1963":"640ml","1965":"640ml","1968":"640ml","1970":"640ml","1973":"720ml","1975":"720ml","1978":"720ml","1980":"720ml","1983":"720ml","1985":"720ml","1988":"720ml"},"ny":{"1955":"トリスウイスキー","1958":"トリスウイスキー","1960":"トリスウイスキー","1963":"トリスウイスキー","1965":"トリスエクストラ","1968":"トリスエクストラ","1970":"トリスエクストラ","1973":"サントリーレッド","1975":"サントリーレッド","1978":"サントリーレッド","1980":"サントリーレッド","1983":"サントリーレッド","1985":"サントリーレッド","1988":"サントリーレッド"},"img":"whisky.webp"},{"id":"ramen","icon":"🍜","cat":"たべもの","name":"ラーメン","label":"ラーメン1杯","sub":"食堂の中華そば・1杯","p":{"1963":51,"1965":63,"1968":77,"1970":96,"1973":143,"1975":211,"1978":269,"1980":311,"1983":355,"1985":383,"1988":417},"cnt":"杯","note":"屋台や食堂の中華そば。昭和40年からの20年で6倍ほどになりました。","now":604,"nowNote":"しょう油ラーメン","img":"ramen.webp"},{"id":"udon","icon":"🥢","cat":"たべもの","name":"かけうどん","label":"かけうどん1杯","sub":"食堂の並・1杯","p":{"1958":27,"1960":30,"1963":40,"1965":54,"1968":64,"1970":81,"1973":124,"1975":188,"1978":240,"1980":275,"1983":316,"1985":333,"1988":354},"cnt":"杯","note":"手軽な外食の代表。昭和35年は30円ほどでした。","now":781,"nowNote":"きつねうどん","noRatio":true,"img":"udon.webp"},{"id":"curry","icon":"🍛","cat":"たべもの","name":"カレーライス","label":"カレーライス1皿","sub":"食堂の並・1皿","p":{"1963":84,"1965":105,"1968":123,"1970":136,"1973":206,"1975":284,"1978":354,"1980":401,"1983":458,"1985":489,"1988":509},"cnt":"皿","note":"昭和40年のカレーライスはラーメンの1.7倍ほど。ちょっとしたごちそうでした。","now":873,"img":"curry.webp"},{"id":"coffee","icon":"☕","cat":"たべもの","name":"喫茶店のコーヒー","label":"喫茶店のコーヒー1杯","sub":"1杯","p":{"1963":66,"1965":72,"1968":83,"1970":95,"1973":133,"1975":194,"1978":235,"1980":247,"1983":274,"1985":280,"1988":308},"cnt":"杯","note":"昭和50年代、喫茶店は全国に15万軒ほど。コーヒー1杯でゆっくり過ごすのが楽しみでした。","now":613,"img":"coffee.webp"},{"id":"sushi","icon":"🍣","cat":"たべもの","name":"にぎりずし","label":"にぎりずし（並）1人前","sub":"すし屋の並・1人前","p":{"1970":200,"1973":325,"1975":476,"1978":612,"1980":685,"1983":746,"1985":812,"1988":864},"cnt":"人前","note":"出前のおすしは特別な日のごちそう。昭和45年からの10年で3倍以上になりました。","now":1742,"img":"sushi.webp"},{"id":"oyako","icon":"🍳","cat":"たべもの","name":"親子どんぶり","label":"親子どんぶり1杯","sub":"食堂の並・1杯","p":{"1963":110,"1965":131,"1968":154,"1970":185,"1973":276,"1975":390,"1978":475,"1980":526,"1983":593,"1985":618,"1988":645},"cnt":"杯","note":"そば屋さんの定番。出前の岡持ちで届けてもらいました。","img":"oyako.webp"},{"id":"sento","icon":"♨️","cat":"くらし","name":"銭湯","label":"銭湯（大人1回）","sub":"東京・大人1回","p":{"1955":15,"1958":16,"1960":17,"1963":23,"1965":28,"1968":36,"1970":38,"1973":55,"1975":100,"1978":155,"1980":195,"1983":240,"1985":260,"1988":280},"cnt":"回","note":"昭和43年、東京には約2,700軒の銭湯がありました。料金は今も都道府県が決めています。","now":600,"nowNote":"東京都・令和8年8月から","img":"sento.webp"},{"id":"barber","icon":"💈","cat":"くらし","name":"床屋さんの散髪","label":"床屋さんの散髪（大人）","sub":"大人1回","p":{"1955":154,"1958":152,"1960":163,"1963":282,"1965":352,"1968":451,"1970":555,"1973":888,"1975":1430,"1978":1960,"1980":2227,"1983":2482,"1985":2603,"1988":2766},"cnt":"回","note":"顔そりと洗髪つき。昭和40年からの10年で4倍になりました。","now":4208,"img":"barber.webp"},{"id":"perm","icon":"💇","cat":"くらし","name":"パーマ","label":"美容院のパーマ","sub":"美容院・1回","p":{"1955":395,"1958":542,"1960":559,"1963":814,"1965":993,"1968":1250,"1970":1480,"1973":2360,"1975":3710,"1978":4830,"1980":5238,"1983":5526,"1985":5713,"1988":5781},"cnt":"回","note":"昭和31年ごろまでは電気で熱くする「電髪」。その後は薬でかける「コールドパーマ」が主流に。","sy":{"1955":"電髪・1回","1958":"コールドパーマ・1回","1960":"コールドパーマ・1回","1963":"コールドパーマ・1回","1965":"コールドパーマ・1回","1968":"コールドパーマ・1回","1970":"コールドパーマ・1回","1973":"コールドパーマ・1回","1975":"コールドパーマ・1回","1978":"コールドパーマ・1回","1980":"コールドパーマ・1回","1983":"コールドパーマ・1回","1985":"コールドパーマ・1回","1988":"コールドパーマ・1回"},"now":10094,"nowNote":"シャンプー・カット込み","noRatio":true,"img":"perm.webp"},{"id":"cleaning","icon":"🏷️","cat":"くらし","name":"クリーニング","label":"ワイシャツのクリーニング1枚","sub":"ワイシャツ1枚","p":{"1955":34,"1958":32,"1960":33,"1963":47,"1965":50,"1968":53,"1970":63,"1973":94,"1975":134,"1978":157,"1980":178,"1983":188,"1985":188,"1988":194},"cnt":"枚","note":"ご用聞きのクリーニング屋さんが、家まで取りに来てくれました。","now":267,"img":"cleaning.webp"},{"id":"kerosene","icon":"🛢️","cat":"くらし","name":"灯油","label":"灯油18リットル","sub":"18リットル・一斗缶ひとつ分","p":{"1958":554,"1960":550,"1963":420,"1965":405,"1968":369,"1970":369,"1973":405,"1975":679,"1978":758,"1980":1543,"1983":1718,"1985":1494,"1988":842},"cnt":"缶","note":"石油ショックで大きく値上がり。トイレットペーパーの買いだめ騒ぎも昭和48年のことです。","now":2375,"img":"kerosene.webp"},{"id":"coal","icon":"⛏️","cat":"くらし","name":"石炭","label":"石炭（かます1俵）","sub":"かます入り50kg","p":{"1955":524,"1958":582,"1960":575,"1963":649,"1965":672},"cnt":"俵","note":"ストーブやかまど、お風呂の燃料。昭和30年代は家庭でも石炭を使いました。","img":"coal.webp"},{"id":"charcoal","icon":"🔥","cat":"くらし","name":"木炭","label":"木炭1俵（15kg）","sub":"俵入り15kg","p":{"1955":514,"1958":562,"1960":574,"1963":729},"cnt":"俵","note":"火鉢やこたつ、七輪で使いました。炭屋さんが俵で配達してくれました。","img":"charcoal.webp"},{"id":"magari","icon":"🏠","cat":"くらし","name":"6畳一間の間借り","label":"6畳一間の間借り（1か月）","sub":"1畳の家賃×6で換算","p":{"1955":2100,"1958":3600,"1960":4700,"1963":5300,"1965":6100,"1968":6300,"1970":7100,"1973":8500,"1975":10300,"1978":13700,"1980":15700},"cnt":"か月","note":"下宿や間借りで暮らす学生や、上京した若い働き手が多かった時代です。","ap":[1955,1958,1960,1963,1965,1968,1970,1973,1975,1978,1980],"img":"magari.webp"},{"id":"tatami","icon":"🟫","cat":"くらし","name":"畳の表替え","label":"畳の表替え（1枚）","sub":"1枚・張り替えの手間代込み","p":{"1963":880,"1965":1060,"1968":1500,"1970":1690,"1973":2400,"1975":3240,"1978":4390,"1980":4612},"cnt":"枚","note":"年の瀬に畳屋さんへ。新しい畳の香りでお正月を迎えました。","now":9301,"img":"tatami.webp"},{"id":"daiku","icon":"🔨","cat":"くらし","name":"大工さんの日当","label":"大工さんの日当（1日）","sub":"家の修理・1人1日","p":{"1965":1960,"1968":2450,"1970":3470,"1973":5170,"1975":7880,"1978":9780,"1980":12300,"1983":12740,"1985":13330,"1988":15220},"cnt":"日","note":"家の修理は近所の大工さんに。昭和40年からの20年で7倍近くになりました。","now":23830,"img":"daiku.webp"},{"id":"kaseifu","icon":"🧹","cat":"くらし","name":"家政婦さんの日給","label":"家政婦さんの日給（8時間）","sub":"通い・8時間","p":{"1970":2010,"1973":2920,"1975":3450,"1978":4600,"1980":5150,"1983":5875,"1985":6250,"1988":6775},"cnt":"日","note":"通いの家政婦さん1日分の給料です。","img":"kaseifu.webp"},{"id":"chabudai","icon":"🍵","cat":"くらし","name":"ちゃぶ台","label":"ちゃぶ台（丸型）","sub":"折りたたみ・丸型","p":{"1955":1218,"1958":1310,"1960":1295},"cnt":"台","note":"家族みんなで囲んだ丸いちゃぶ台。食べ終わったら足を折りたたんで片づけました。","img":"chabudai.webp"},{"id":"zataku","icon":"🪑","cat":"くらし","name":"座卓","label":"座卓（折りたたみ）","sub":"メラミン板・角型","p":{"1963":2920,"1965":2820,"1968":3130,"1970":3360,"1973":3710,"1975":4860,"1978":4710,"1980":5945,"1983":6429,"1985":5815,"1988":5978},"cnt":"台","note":"丸いちゃぶ台から、四角いメラミンの座卓へ。茶の間の主役が変わりました。","img":"zataku.webp"},{"id":"moufu","icon":"🛏️","cat":"くらし","name":"毛布","label":"毛布1枚","sub":"1枚","p":{"1958":1293,"1960":1501,"1963":2050,"1965":1900,"1968":1890,"1970":1940,"1973":2840,"1975":3230,"1978":3800},"cnt":"枚","note":"素材がスフ、混紡、アクリルと変わり、軽くて暖かくなりました。","sy":{"1958":"スフ毛布","1960":"スフ毛布","1963":"混紡毛布","1965":"混紡毛布","1968":"レーヨン毛布","1970":"レーヨン毛布","1973":"アクリル毛布","1975":"アクリル毛布","1978":"アクリル毛布"},"img":"moufu.webp"},{"id":"futon","icon":"☁️","cat":"くらし","name":"布団綿","label":"布団綿（3kg）","sub":"白綿3kg","p":{"1955":1700,"1958":1623,"1960":1666,"1963":1880,"1965":1850,"1968":1910,"1970":2090,"1973":2880,"1975":3550,"1978":5300,"1980":6064,"1983":6725,"1985":6828,"1988":6779},"cnt":"組","note":"せんべい布団になったら、綿を打ち直してまた使いました。","img":"futon.webp"},{"id":"chawan","icon":"🍚","cat":"くらし","name":"ご飯茶わん","label":"ご飯茶わん1個","sub":"陶磁器・1個","p":{"1955":24,"1958":27,"1960":27,"1963":44,"1965":58,"1968":65,"1970":93,"1973":143,"1975":213,"1978":234,"1980":262,"1983":328,"1985":362,"1988":379},"cnt":"個","note":"家族それぞれの「自分の茶わん」がありました。","now":578,"img":"chawan.webp"},{"id":"keikou","icon":"💡","cat":"くらし","name":"蛍光灯","label":"蛍光灯（20ワット1本）","sub":"20ワット・1本","p":{"1958":299,"1960":288,"1963":288,"1965":295,"1968":288,"1970":293,"1973":254,"1975":314,"1978":303,"1980":308,"1983":308},"cnt":"本","note":"昭和33年から58年まで、ずっと300円前後。値段が変わらない品物でした。","img":"keikou.webp"},{"id":"chiri","icon":"🧻","cat":"くらし","name":"ちり紙","label":"ちり紙100枚","sub":"100枚","p":{"1955":12,"1958":13,"1960":14,"1963":18,"1965":16,"1968":18,"1970":20},"cnt":"束","note":"鼻紙もトイレも、四角いちり紙が当たり前の時代でした。","img":"chiri.webp"},{"id":"sentaku","icon":"🧼","cat":"くらし","name":"洗濯用の洗剤","label":"洗濯用の石けん・洗剤","sub":"1箱","p":{"1955":11,"1958":20,"1960":94,"1963":93,"1965":92,"1968":93,"1970":184,"1973":454,"1975":651,"1978":592,"1980":687,"1983":875,"1985":881,"1988":874},"cnt":"箱","note":"たらいと洗濯板で洗った時代から、洗濯機と合成洗剤の時代へ。","sy":{"1955":"固形石けん1個","1958":"固形石けん1個（約170g）","1960":"粉石けん・約600g","1963":"1箱500g","1965":"1箱500g","1968":"1箱500g","1970":"1箱1.05kg","1973":"大箱2.65kg","1975":"大箱2.65kg","1978":"1箱1.66kg","1980":"1箱1.66kg","1983":"大箱2.65kg","1985":"大箱2.65kg","1988":"大箱2.65kg"},"ny":{"1955":"洗濯石けん","1958":"洗濯石けん","1960":"粉石けん","1963":"合成洗剤","1965":"合成洗剤","1968":"合成洗剤","1970":"合成洗剤","1973":"合成洗剤","1975":"合成洗剤","1978":"合成洗剤","1980":"合成洗剤","1983":"合成洗剤","1985":"合成洗剤","1988":"合成洗剤"},"img":"sentaku.webp"},{"id":"soap","icon":"🛁","cat":"くらし","name":"化粧石けん","label":"化粧石けん1個","sub":"1個","p":{"1955":30,"1958":30,"1960":29,"1963":28,"1965":30,"1968":30,"1970":30,"1973":31,"1975":78,"1978":76,"1980":80,"1983":83,"1985":93,"1988":93},"cnt":"個","note":"昭和30年代から48年ごろまで、ずっと1個30円ほどでした。","img":"soap.webp"},{"id":"haburashi","icon":"🦷","cat":"くらし","name":"歯ブラシ","label":"歯ブラシ1本","sub":"大人用・1本","p":{"1955":50,"1958":50,"1960":49,"1963":50,"1965":50,"1968":95,"1970":95,"1973":95,"1975":117,"1978":116,"1980":116,"1983":132,"1985":131,"1988":133},"cnt":"本","note":"昭和50年代からいままで、値段がほとんど変わっていません。","now":135,"img":"haburashi.webp"},{"id":"shampoo","icon":"💆","cat":"くらし","name":"粉シャンプー","label":"粉シャンプー（2袋）","sub":"粉末・2袋入り","p":{"1958":10,"1960":9,"1963":10,"1965":10},"cnt":"箱","note":"昭和30年代のシャンプーは粉。お湯に溶かして使いました。","img":"shampoo.webp"},{"id":"carnation","icon":"💐","cat":"くらし","name":"カーネーション","label":"カーネーション1本","sub":"1本","p":{"1963":28,"1965":32,"1968":33,"1970":42,"1973":63,"1975":95,"1978":125,"1980":146,"1983":161,"1985":174,"1988":196},"cnt":"本","note":"母の日の贈りもの。子どものおこづかいで買える花でした。","now":234,"img":"carnation.webp"},{"id":"kaze","icon":"💊","cat":"くらし","name":"かぜ薬","label":"かぜ薬1箱","sub":"1箱","p":{"1958":150,"1960":146,"1963":133,"1965":162,"1968":167,"1970":230,"1973":224,"1975":281},"cnt":"箱","note":"置き薬の富山の薬売りさんも、どの家でもおなじみでした。","sy":{"1958":"錠剤25錠","1960":"錠剤25錠","1963":"錠剤25錠","1965":"錠剤25錠","1968":"錠剤25錠","1970":"錠剤30錠","1973":"錠剤30錠","1975":"錠剤30錠"},"img":"kaze.webp"},{"id":"sebiro","icon":"🕴️","cat":"身なり","name":"背広（秋冬物）","label":"背広（秋冬物）","sub":"上下・中級品","p":{"1955":11019,"1958":9872,"1960":11007,"1963":12900,"1965":13500,"1968":17200,"1970":22000,"1973":29800,"1975":39000,"1978":44200,"1980":45110,"1983":48540,"1985":53990,"1988":53100},"cnt":"着","note":"昭和30年代の背広は、給料の1か月分以上することも。大切に長く着ました。","now":94310,"img":"sebiro.webp"},{"id":"shitate","icon":"📏","cat":"身なり","name":"背広の仕立て代","label":"背広の仕立て代","sub":"上下・普通仕立て","p":{"1960":7550,"1963":10400,"1965":12100,"1968":15100,"1970":19400,"1973":33100,"1975":42500,"1978":53700,"1980":61740,"1983":64380,"1985":66060,"1988":73800},"cnt":"着","note":"生地を買って、洋服屋さんで仕立ててもらうのが当たり前でした。","img":"shitate.webp"},{"id":"gakuran","icon":"🎒","cat":"身なり","name":"学生服（詰め襟）","label":"学生服（詰め襟）","sub":"中学生用・上下","p":{"1955":1758,"1958":2319,"1960":2090,"1963":3880,"1965":4260,"1968":4840,"1970":5780,"1973":10900,"1975":15800,"1978":19200,"1980":20890,"1983":22730,"1985":23590,"1988":24410},"cnt":"着","note":"入学のときは大きめを買って、3年間着ました。","now":39533,"nowNote":"公立中学校用","img":"gakuran.webp"},{"id":"shirt","icon":"👕","cat":"身なり","name":"ワイシャツ","label":"ワイシャツ1枚（綿）","sub":"綿・白","p":{"1955":579,"1958":593,"1960":589,"1963":726,"1965":965,"1968":1070,"1970":1630,"1973":2240,"1975":3090,"1978":3490,"1980":4000},"cnt":"枚","note":"白いワイシャツは、勤め人の毎日の制服のようなものでした。","now":3567,"nowNote":"ポリエステル混","noRatio":true,"img":"shirt.webp"},{"id":"necktie","icon":"👔","cat":"身なり","name":"ネクタイ","label":"ネクタイ1本（絹）","sub":"絹・中級品","p":{"1955":435,"1958":614,"1960":572,"1963":793,"1965":930,"1968":1120,"1970":1340,"1973":2230,"1975":2770,"1978":3050,"1980":3438,"1983":3900,"1985":4170,"1988":4370},"cnt":"本","note":"父の日や就職祝いの贈りものの定番。","now":4396,"img":"necktie.webp"},{"id":"stocking","icon":"🧦","cat":"身なり","name":"ナイロン靴下","label":"女性のナイロン靴下","sub":"1足","p":{"1955":458,"1958":400,"1960":394,"1963":350,"1965":294,"1968":189,"1970":163,"1973":242,"1975":237,"1978":233,"1980":239,"1983":292,"1985":293,"1988":295},"cnt":"足","note":"昭和30年代は高級品。その後どんどん安くなった、珍しい品物です。","sy":{"1955":"ナイロン長靴下・1足","1958":"ナイロン長靴下・1足","1960":"ナイロン長靴下・1足","1963":"ナイロン長靴下・1足","1965":"ナイロン長靴下・1足","1968":"ナイロン長靴下・1足","1970":"ナイロン長靴下・1足","1973":"パンティストッキング・1足","1975":"パンティストッキング・1足","1978":"パンティストッキング・1足","1980":"パンティストッキング・1足","1983":"パンティストッキング・1足","1985":"パンティストッキング・1足","1988":"パンティストッキング・1足"},"ny":{"1973":"パンティストッキング","1975":"パンティストッキング","1978":"パンティストッキング","1980":"パンティストッキング","1983":"パンティストッキング","1985":"パンティストッキング","1988":"パンティストッキング"},"now":640,"nowNote":"パンティストッキング1足","img":"stocking.webp"},{"id":"kutsu","icon":"👞","cat":"身なり","name":"革靴（男性用）","label":"男性の革靴","sub":"牛革・1足","p":{"1955":2577,"1958":2807,"1960":3153,"1963":3250,"1965":3350,"1968":3610,"1970":3920,"1973":4590,"1975":5890,"1978":6950,"1980":7517,"1983":8620,"1985":8870,"1988":9280},"cnt":"足","note":"靴みがきに出して、ぴかぴかにしてもらうサラリーマンも多くいました。","now":13048,"img":"kutsu.webp"},{"id":"undogutsu","icon":"👟","cat":"身なり","name":"子どもの運動靴","label":"子どもの運動靴","sub":"1足","p":{"1955":201,"1958":210,"1960":229,"1963":247,"1965":269,"1968":320,"1970":362,"1973":402,"1975":485,"1978":499},"cnt":"足","note":"運動会の前に、新しい運動靴を買ってもらうのが楽しみでした。","sy":{"1955":"キャンバス・ゴム底","1958":"キャンバス・ゴム底","1960":"キャンバス・ゴム底","1963":"キャンバス・ゴム底","1965":"キャンバス・ゴム底","1968":"ビニール製","1970":"ビニール製","1973":"ビニール製","1975":"ビニール製","1978":"ビニール製"},"img":"undogutsu.webp"},{"id":"zouri","icon":"👡","cat":"身なり","name":"女性の草履","label":"女性の草履","sub":"ビニール表・1足","p":{"1955":533,"1958":626,"1960":644,"1963":873,"1965":966,"1968":1060,"1970":1290,"1973":1880,"1975":2560},"cnt":"足","note":"よそゆきの着物に合わせて。","img":"zouri.webp"},{"id":"keito","icon":"🧶","cat":"身なり","name":"毛糸","label":"毛糸（500g）","sub":"中細・500g","p":{"1955":1942,"1958":1685,"1960":1431,"1963":1420,"1965":1500,"1968":1570,"1970":1590,"1973":2260,"1975":2840,"1978":2990,"1980":3187,"1983":3785,"1985":3814,"1988":3949},"cnt":"袋","note":"セーターや手袋は家で編むもの。古いセーターをほどいて編み直しもしました。","img":"keito.webp"},{"id":"onepiece","icon":"👗","cat":"身なり","name":"ワンピース","label":"ワンピース（夏物）","sub":"夏物・1着","p":{"1970":3380,"1973":6680,"1975":8460,"1978":10700,"1980":14570,"1983":17670},"cnt":"着","note":"既製服が広まり、お店で好きな服を選べるようになりました。","img":"onepiece.webp"},{"id":"furisode","icon":"👘","cat":"身なり","name":"振袖","label":"振袖（仕立て上がり）","sub":"絹・中級品","p":{"1970":49300,"1973":97100,"1975":125000},"cnt":"枚","note":"成人式の晴れ着。昭和45年からの5年で2.5倍になりました。","img":"furisode.webp"},{"id":"toden","icon":"🚋","cat":"乗りもの","name":"都電","label":"都電（1回）","sub":"東京の路面電車・1回","p":{"1955":10,"1958":13,"1960":13,"1963":15,"1965":15,"1968":20,"1970":20},"cnt":"回","note":"どこまで乗っても同じ料金。昭和40年代に次々と廃止され、いま残るのは荒川線だけです。","img":"toden.webp"},{"id":"kokutetsu","icon":"🚃","cat":"乗りもの","name":"国鉄の初乗り","label":"国鉄の初乗り（山手線など）","sub":"大人・きっぷ1枚","p":{"1955":10,"1960":10,"1965":10,"1968":20,"1970":30,"1973":30,"1975":30,"1977":60},"cnt":"回","note":"昭和26年から15年間、ずっと10円。昭和51年には30円から60円へ、一気に倍になりました。","img":"kokutetsu.webp"},{"id":"taxi","icon":"🚕","cat":"乗りもの","name":"タクシー","label":"タクシーの初乗り（東京）","sub":"東京・初乗り","p":{"1958":70,"1960":70,"1963":80,"1965":100,"1968":100,"1970":130,"1973":170,"1975":280,"1978":330,"1980":380,"1983":430,"1985":470,"1988":470},"cnt":"回","note":"いまは初乗りの距離が約1kmと短くなったので、500円で乗れます。","now":500,"nowNote":"初乗りは約1km","noRatio":true,"img":"taxi.webp"},{"id":"plane","icon":"✈️","cat":"乗りもの","name":"飛行機（東京〜札幌）","label":"飛行機（東京〜札幌・片道）","sub":"大人・片道","p":{"1970":12900,"1973":13900,"1975":18800,"1978":18800,"1980":23400,"1983":25500,"1985":25500,"1988":25500},"cnt":"回","note":"空の旅は、まだ特別なものでした。","img":"plane.webp"},{"id":"car","icon":"🚗","cat":"乗りもの","name":"乗用車","label":"乗用車（1500cc）","sub":"国産・1500cc","p":{"1970":654000,"1973":696000,"1975":829000,"1978":977000,"1980":989000,"1983":1064000,"1985":1170000},"cnt":"台","note":"「マイカー」が広まった時代。家族でドライブに出かけるのがあこがれでした。","img":"car.webp"},{"id":"gas","icon":"⛽","cat":"乗りもの","name":"ガソリン","label":"ガソリン1リットル","sub":"レギュラー・1リットル","p":{"1968":55,"1970":54,"1973":66,"1975":112,"1978":109,"1980":155,"1983":158,"1985":146,"1988":122},"cnt":"リットル","note":"石油ショックで3倍に。昭和57年ごろの値段は、いまとほとんど同じです。","now":178,"img":"gas.webp"},{"id":"bicycle","icon":"🚲","cat":"乗りもの","name":"自転車","label":"自転車1台","sub":"1台","p":{"1958":18594,"1960":18963,"1963":17900,"1965":19900,"1968":20800,"1970":24200,"1973":26200,"1975":37000,"1978":35900,"1980":36210,"1983":32190,"1985":33580},"cnt":"台","note":"昭和30年代の自転車は、お米やお酒の配達にも大活躍した大切な財産でした。","sy":{"1958":"荷台付きの実用車","1960":"荷台付きの実用車","1963":"荷台付きの実用車","1965":"軽快車","1968":"軽快車","1970":"軽快車","1973":"軽快車","1975":"軽快車","1978":"軽快車","1980":"軽快車","1983":"ミニサイクル","1985":"ミニサイクル"},"now":49678,"nowNote":"3段変速のシティ車","noRatio":true,"img":"bicycle.webp"},{"id":"subaru","icon":"🚙","cat":"乗りもの","name":"スバル360","label":"スバル360（発売時）","sub":"発売時の値段","p":{"1958":425000},"cnt":"台","note":"「てんとう虫」の愛称で親しまれた軽自動車。当時のクラウンの半分以下の値段でした。","launch":true,"img":"subaru.webp"},{"id":"cub","icon":"🛵","cat":"乗りもの","name":"スーパーカブ","label":"スーパーカブ（発売時）","sub":"発売時の値段","p":{"1958":55000},"cnt":"台","note":"初任給が8,500円ほどの時代に5万5千円。そば屋さんの出前でも大活躍しました。","launch":true,"img":"cub.webp"},{"id":"shinkansen","icon":"🚄","cat":"乗りもの","name":"新幹線ひかり","label":"新幹線ひかり（東京〜新大阪）","sub":"開業時・運賃と特急料金","p":{"1964":2480},"cnt":"回","note":"東京オリンピック直前の昭和39年10月1日に開業。運賃1,180円と特急料金1,300円でした。","launch":true,"img":"shinkansen.webp"},{"id":"hagaki","icon":"📮","cat":"通信","name":"はがき","label":"はがき1枚","sub":"1枚","p":{"1955":5,"1958":5,"1960":5,"1963":5,"1965":5,"1968":7,"1970":7,"1973":10,"1975":10,"1978":20,"1980":20,"1983":40,"1985":40,"1988":40},"cnt":"枚","note":"昭和26年から15年間、ずっと5円。昭和51年には10円から20円へ、一気に倍に。","now":85,"img":"hagaki.webp"},{"id":"fusho","icon":"✉️","cat":"通信","name":"封書（手紙）","label":"封書（手紙）1通","sub":"定形・1通","p":{"1955":10,"1958":10,"1960":10,"1963":10,"1965":10,"1968":15,"1970":15,"1973":20,"1975":20,"1978":50,"1980":50,"1983":60,"1985":60,"1988":60},"cnt":"通","note":"昭和51年に20円から50円へ。2倍半の大きな値上げでした。","now":110,"img":"fusho.webp"},{"id":"denpo","icon":"📨","cat":"通信","name":"電報","label":"電報1通","sub":"1通","p":{"1963":70,"1965":70,"1968":70,"1970":70,"1973":150,"1975":150,"1978":300,"1980":300},"cnt":"通","note":"「チチキトク スグカエレ」。急ぎの知らせは電報でした。","sy":{"1963":"15字まで","1965":"15字まで","1968":"15字まで","1970":"15字まで","1973":"25字まで","1975":"25字まで","1978":"25字まで","1980":"25字まで"},"img":"denpo.webp"},{"id":"phone","icon":"☎️","cat":"通信","name":"家の電話","label":"家の電話の市内通話","sub":"市内1回","p":{"1955":7,"1958":7,"1960":7,"1963":7,"1965":7,"1968":7,"1970":7,"1973":7,"1975":7,"1978":10,"1980":10,"1983":10,"1985":10,"1988":10},"cnt":"回","note":"黒電話の市内通話は、昭和28年から50年ごろまで、ずっと7円でした。","sy":{"1955":"市内1回","1958":"市内1回","1960":"市内1回","1963":"市内1回","1965":"市内1回","1968":"市内1回","1970":"市内1回","1973":"市内3分","1975":"市内3分","1978":"市内3分","1980":"市内3分","1983":"市内3分","1985":"市内3分","1988":"市内3分"},"img":"phone.webp"},{"id":"nhk","icon":"📡","cat":"通信","name":"NHK受信料","label":"NHKの受信料（1か月）","sub":"1か月","p":{"1955":300,"1958":300,"1960":300,"1963":330,"1965":330,"1970":465,"1975":465,"1980":880,"1985":990},"cnt":"か月","note":"テレビの受信料。昭和43年からはカラーテレビ用の契約ができました。","sy":{"1955":"テレビ・1か月","1958":"テレビ・1か月","1960":"テレビ・1か月","1963":"テレビ・1か月","1965":"テレビ・1か月","1970":"カラー契約・1か月","1975":"カラー契約・1か月","1980":"カラー契約・1か月","1985":"カラー契約・1か月"},"now":1100,"nowNote":"地上契約・口座払い","noRatio":true,"img":"nhk.webp"},{"id":"radiofee","icon":"🎙️","cat":"通信","name":"ラジオの受信料","label":"ラジオの受信料（1か月）","sub":"1か月","p":{"1955":67,"1958":67,"1963":50,"1965":50,"1968":50},"cnt":"か月","note":"ラジオだけの受信料は、昭和43年に廃止されました。","img":"radiofee.webp"},{"id":"newspaper","icon":"📰","cat":"通信","name":"新聞","label":"新聞（朝夕刊・1か月）","sub":"朝夕刊・1か月","p":{"1955":330,"1958":330,"1960":390,"1963":450,"1965":580,"1968":660,"1970":750,"1973":1100,"1975":1700,"1978":1500,"1980":1800,"1983":2600,"1985":2600,"1988":2800},"cnt":"か月","note":"石油ショックのころ（昭和49年）、1,100円から1,700円へ大きく値上がりしました。","now":4900,"nowNote":"全国紙の朝夕刊セット","img":"newspaper.webp"},{"id":"bunshun","icon":"📕","cat":"学び","name":"文藝春秋","label":"月刊誌「文藝春秋」","sub":"1冊","p":{"1955":95,"1958":103,"1960":107,"1963":115,"1965":129,"1968":146,"1970":160,"1973":225,"1975":364,"1978":443,"1980":480,"1983":548,"1985":560,"1988":559},"cnt":"冊","note":"お父さんの読む月刊誌の代表。分厚い一冊でした。","img":"bunshun.webp"},{"id":"shufunotomo","icon":"📗","cat":"学び","name":"主婦の友","label":"月刊誌「主婦の友」","sub":"1冊","p":{"1955":183,"1958":157,"1960":166,"1963":207,"1965":248,"1968":309,"1970":360,"1973":428,"1975":568,"1978":647,"1980":665,"1983":679,"1985":715,"1988":769},"cnt":"冊","note":"家計簿の付録が人気の婦人雑誌。平成20年に休刊しました。","img":"shufunotomo.webp"},{"id":"iwanami","icon":"📘","cat":"学び","name":"岩波新書","label":"岩波新書1冊","sub":"1冊","p":{"1970":150,"1973":180,"1975":230,"1978":320,"1980":380,"1983":430,"1985":480,"1988":480},"cnt":"冊","note":"学生や勤め人の教養の本。昭和45年は150円でした。","img":"iwanami.webp"},{"id":"national","icon":"🎓","cat":"学び","name":"国立大学の授業料","label":"国立大学の授業料（1年分）","sub":"1年分","p":{"1955":6000,"1958":9000,"1960":9000,"1963":12000,"1965":12000,"1968":12000,"1970":12000,"1973":36000,"1975":36000,"1978":144000,"1980":180000,"1983":216000,"1985":252000,"1988":300000},"cnt":"年","note":"昭和40年代は1年で1万2千円。昭和51年ごろから大きく上がり始めました。","sy":{"1955":"月謝×12か月","1958":"月謝×12か月","1960":"月謝×12か月","1963":"月謝×12か月","1965":"月謝×12か月"},"now":535800,"nowNote":"国の標準額","img":"national.webp"},{"id":"private","icon":"🏛️","cat":"学び","name":"私立大学の授業料","label":"私立大学の授業料（1年分）","sub":"文系・1年分","p":{"1955":21500,"1958":29000,"1960":34500,"1963":46100,"1965":52100,"1968":74900,"1970":76400,"1973":107000,"1975":153000,"1978":225000,"1980":304000,"1983":344800,"1985":368900,"1988":433300},"cnt":"年","note":"昭和40年代なかばの私立大学は、国立大学の6倍ほどの授業料でした。","sy":{"1955":"月謝×12か月","1958":"月謝×12か月","1960":"月謝×12か月","1963":"月謝×12か月","1965":"月謝×12か月"},"ap":[1955,1958,1960,1963,1965],"img":"private.webp"},{"id":"highschool","icon":"🏫","cat":"学び","name":"公立高校の授業料","label":"公立高校の授業料（1か月）","sub":"東京・1か月","p":{"1955":500,"1958":600,"1960":600,"1963":600,"1965":750,"1968":800,"1970":800,"1973":800,"1975":800,"1978":4000,"1980":5600},"cnt":"か月","note":"昭和50年まで、月800円ほどでした。","img":"highschool.webp"},{"id":"kinder","icon":"🧸","cat":"学び","name":"私立幼稚園の保育料","label":"私立幼稚園の保育料（1か月）","sub":"1か月","p":{"1958":900,"1960":975,"1963":1650,"1965":1950,"1968":3040,"1970":3470,"1973":4940,"1975":9740,"1978":14000,"1980":15550,"1983":17120,"1985":17670,"1988":18920},"cnt":"か月","note":"昭和40年代のベビーブームで、幼稚園に通う子どもがぐんと増えました。","img":"kinder.webp"},{"id":"soroban","icon":"🧮","cat":"学び","name":"そろばん塾","label":"そろばん塾の月謝","sub":"1か月・週3日以上","p":{"1965":679,"1968":852,"1970":1130,"1973":1760,"1975":2560,"1978":3430,"1980":4044,"1983":4510,"1985":4777,"1988":5113},"cnt":"か月","note":"「ご破算で願いましては」。読み・書き・そろばんの時代でした。","img":"soroban.webp"},{"id":"yousai","icon":"✂️","cat":"学び","name":"洋裁学校","label":"洋裁学校の月謝","sub":"昼間部・1か月","p":{"1963":1730,"1965":2350,"1968":2900,"1970":3670,"1973":4980,"1975":7530,"1978":11700,"1980":15080,"1983":18030,"1985":20190,"1988":25350},"cnt":"か月","note":"洋服を自分で縫う女性が多く、洋裁学校は大人気でした。","img":"yousai.webp"},{"id":"ryouri","icon":"🍳","cat":"学び","name":"料理教室","label":"料理教室の月謝","sub":"週1回・1か月","p":{"1968":1460,"1970":1950,"1973":1810,"1975":2770,"1978":4390,"1980":3987},"cnt":"か月","note":"テレビの料理番組とともに、家庭の料理もどんどん洋風になりました。","img":"ryouri.webp"},{"id":"juku","icon":"📚","cat":"学び","name":"学習塾","label":"学習塾の月謝（中学生）","sub":"1か月","p":{"1978":8330,"1980":9733,"1983":11100,"1985":13020,"1988":14240},"cnt":"か月","note":"昭和50年代、受験競争とともに塾通いが当たり前になりました。","img":"juku.webp"},{"id":"enpitsu","icon":"✏️","cat":"学び","name":"鉛筆","label":"鉛筆1本","sub":"HB・1本","p":{"1955":10,"1958":10,"1960":10,"1963":10,"1965":10,"1968":10},"cnt":"本","note":"昭和32年から43年まで、ずっと1本10円でした。","img":"enpitsu.webp"},{"id":"note","icon":"📓","cat":"学び","name":"ノート","label":"ノート1冊","sub":"1冊","p":{"1955":21,"1958":20,"1960":20,"1963":22,"1965":30,"1968":33,"1970":40,"1973":51,"1975":73,"1978":84,"1980":96,"1983":103,"1985":102,"1988":104},"cnt":"冊","note":"新学期に新しいノートをそろえるのが楽しみでした。","sy":{"1955":"A5判","1958":"A5判","1960":"A5判","1963":"A5判","1965":"B5判","1968":"B5判","1970":"B5判","1973":"B5判ほど・30枚","1975":"B5判ほど・30枚","1978":"B5判ほど・30枚","1980":"B5判ほど・30枚","1983":"B5判ほど・30枚","1985":"B5判ほど・30枚","1988":"B5判ほど・30枚"},"now":207,"img":"note.webp"},{"id":"ballpen","icon":"🖊️","cat":"学び","name":"ボールペン","label":"ボールペン1本","sub":"透明軸・1本","p":{"1973":42,"1975":50,"1978":49,"1980":49,"1983":48,"1985":62,"1988":68},"cnt":"本","note":"昭和50年代は1本50円ほど。透明な軸の定番品でした。","img":"ballpen.webp"},{"id":"mannenhitsu","icon":"✒️","cat":"学び","name":"万年筆","label":"万年筆1本","sub":"国産・1本","p":{"1955":347,"1958":500,"1960":600,"1963":600,"1965":600,"1968":1000,"1970":1000,"1973":2000,"1975":3000,"1978":3000,"1980":3000,"1983":3000,"1985":3000,"1988":3000},"cnt":"本","note":"入学や就職のお祝いの定番。名前を彫ってもらうのがうれしかったものです。","img":"mannenhitsu.webp"},{"id":"jisho","icon":"📖","cat":"学び","name":"英和辞典","label":"英和辞典1冊","sub":"1冊","p":{"1973":1600,"1975":2000,"1978":2200,"1980":2200},"cnt":"冊","note":"高校入学のときにそろえる一冊でした。","img":"jisho.webp"},{"id":"kyushoku","icon":"🍽️","cat":"学び","name":"学校給食費","label":"小学校の給食費（1か月）","sub":"低学年・1か月","p":{"1975":1793,"1978":2240,"1980":2366,"1983":2702,"1985":2830,"1988":2755},"cnt":"か月","note":"脱脂粉乳から牛乳へ。昭和50年代には米飯給食も始まりました。","img":"kyushoku.webp"},{"id":"movie","icon":"🎬","cat":"あそび","name":"映画館","label":"映画館（大人1回）","sub":"大人1回","p":{"1955":133,"1958":109,"1960":119,"1963":199,"1965":236,"1968":288,"1970":351,"1973":751,"1975":982,"1978":1280,"1980":1357,"1983":1476,"1985":1496,"1988":1495},"cnt":"回","note":"昭和33年には、映画館の入場者が1年で11億人を超えました。娯楽の王様でした。","now":1933,"nowNote":"全国平均","img":"movie.webp"},{"id":"baseball","icon":"⚾","cat":"あそび","name":"プロ野球","label":"プロ野球（内野席）","sub":"大人1人","p":{"1970":299,"1973":350,"1975":515,"1978":800,"1980":872,"1983":1058,"1985":1175,"1988":1509},"cnt":"回","note":"ナイター中継はお茶の間の楽しみ。球場で見るのは特別な日でした。","img":"baseball.webp"},{"id":"bowling","icon":"🎳","cat":"あそび","name":"ボウリング","label":"ボウリング1ゲーム","sub":"平日夜・1ゲーム","p":{"1970":250,"1973":300,"1975":300,"1978":350,"1980":388,"1983":417,"1985":450,"1988":500},"cnt":"ゲーム","note":"昭和40年代の半ばに大ブーム。ボウリング場に順番待ちの行列ができるほどでした。","now":829,"img":"bowling.webp"},{"id":"mahjong","icon":"🀄","cat":"あそび","name":"マージャン","label":"雀荘のマージャン（1時間）","sub":"1人1時間","p":{"1970":64,"1973":89,"1975":142,"1978":188,"1980":190,"1983":251,"1985":338,"1988":363},"cnt":"時間","note":"会社帰りに雀荘へ。昭和45年は1時間64円でした。","img":"mahjong.webp"},{"id":"ryokan","icon":"🏨","cat":"あそび","name":"旅館","label":"旅館（1泊2食）","sub":"1人・1泊2食","p":{"1963":1770,"1965":2210,"1968":2710,"1970":2840,"1973":3540,"1975":4670,"1978":5940,"1980":7816,"1983":8716,"1985":9192,"1988":9921},"cnt":"泊","note":"社員旅行や新婚旅行で温泉旅館へ。団体旅行が盛んな時代でした。","img":"ryokan.webp"},{"id":"record","icon":"💿","cat":"あそび","name":"レコード","label":"シングルレコード1枚","sub":"シングル盤・1枚","p":{"1958":300,"1960":300,"1963":290,"1965":317,"1968":350,"1970":391,"1973":500,"1975":517,"1978":600,"1980":621,"1983":700,"1985":700,"1988":700},"cnt":"枚","note":"真ん中の穴が大きいので「ドーナツ盤」とも呼ばれました。","img":"record.webp"},{"id":"film_bw","icon":"🎞️","cat":"あそび","name":"白黒フィルム","label":"白黒フィルム1本","sub":"35ミリ・36枚撮り","p":{"1963":173,"1965":173},"cnt":"本","note":"写真屋さんに現像を頼み、できあがりを数日待ちました。","img":"film_bw.webp"},{"id":"film_color","icon":"📸","cat":"あそび","name":"カラーフィルム","label":"カラーフィルム1本","sub":"35ミリ・24枚撮り","p":{"1973":379,"1975":463,"1978":468,"1980":504,"1983":517,"1985":534,"1988":518},"cnt":"本","note":"旅行には何本も持っていきました。24枚撮りを大事に使ったものです。","img":"film_color.webp"},{"id":"fridge","icon":"🧊","cat":"家電","name":"電気冷蔵庫","label":"電気冷蔵庫","sub":"1台","p":{"1963":49600,"1965":54700,"1968":69000,"1970":55900,"1973":71300,"1975":97300,"1978":102000,"1980":141600,"1983":150700,"1985":181300,"1988":179400},"cnt":"台","note":"白黒テレビ・洗濯機・冷蔵庫は「三種の神器」。冷蔵庫はだんだん大きくなりました。","sy":{"1963":"100リットル","1965":"100リットル","1968":"120リットルほど","1970":"120リットルほど","1973":"2ドア・160リットルほど","1975":"2ドア・160リットルほど","1978":"2ドア・170リットル","1980":"2ドア・230リットル","1983":"2ドア・230リットル","1985":"3ドア・270リットル","1988":"3ドア・300リットル"},"img":"fridge.webp"},{"id":"souji","icon":"🌀","cat":"家電","name":"電気掃除機","label":"電気掃除機","sub":"1台","p":{"1963":14200,"1965":15500,"1968":18000,"1970":16400,"1973":14000,"1975":19400,"1978":21700,"1980":19990,"1983":23200,"1985":23020,"1988":27810},"cnt":"台","note":"ほうきとはたきの時代から、掃除機の時代へ。","img":"souji.webp"},{"id":"washer","icon":"🧺","cat":"家電","name":"電気洗濯機","label":"電気洗濯機","sub":"1台","p":{"1960":22337,"1963":22100,"1965":18400,"1968":31000,"1970":27100,"1973":21100,"1975":29800,"1978":26700,"1980":27760,"1983":25120,"1985":25170,"1988":24510},"cnt":"台","note":"ローラーにはさんで手で回して絞る洗濯機から、脱水槽つきの2槽式へ。","sy":{"1960":"うず巻き式・手回し絞り機付き","1963":"うず巻き式・手回し絞り機付き","1965":"うず巻き式・手回し絞り機付き","1968":"2槽式","1970":"2槽式","1973":"2槽式","1975":"2槽式","1978":"2槽式","1980":"2槽式","1983":"2槽式","1985":"2槽式","1988":"2槽式"},"img":"washer.webp"},{"id":"cooler","icon":"❄️","cat":"家電","name":"ルームクーラー","label":"ルームクーラー","sub":"冷房専用・1台","p":{"1970":146000,"1973":132000,"1975":165000,"1978":186000,"1980":177200,"1983":180100},"cnt":"台","note":"カラーテレビ・クーラー・自動車は「新・三種の神器（3C）」と呼ばれました。","img":"cooler.webp"},{"id":"bwtv","icon":"📺","cat":"家電","name":"白黒テレビ","label":"白黒テレビ","sub":"1台","p":{"1963":57500,"1965":50300,"1968":67700,"1970":40600,"1973":28100},"cnt":"台","note":"白黒テレビ・洗濯機・冷蔵庫は「三種の神器」。近所の家に集まってテレビを見たものです。","sy":{"1963":"14型","1965":"16型","1968":"19型","1970":"14型・持ち運べる型","1973":"12型・持ち運べる型"},"img":"bwtv.webp"},{"id":"colortv","icon":"🌈","cat":"家電","name":"カラーテレビ","label":"カラーテレビ","sub":"1台","p":{"1970":153000,"1973":156000,"1975":178000,"1978":133000,"1980":121000,"1983":162100,"1985":154100,"1988":113700},"cnt":"台","note":"家具のような脚つきの大きなカラーテレビ。昭和50年代からは値下がりしていきました。","sy":{"1970":"19型・家具調","1973":"20型・家具調","1975":"20型・家具調","1978":"18型","1980":"18型","1983":"21型・リモコン付き","1985":"21型・リモコン付き","1988":"21型・リモコン付き"},"img":"colortv.webp"},{"id":"radio","icon":"📻","cat":"家電","name":"ラジオ","label":"ラジオ","sub":"1台","p":{"1958":8210,"1960":8853,"1963":11100,"1965":9550,"1968":6840,"1970":9210,"1973":14600,"1975":16000,"1978":15900},"cnt":"台","note":"持ち歩けるトランジスタラジオは、日本の得意な輸出品にもなりました。","sy":{"1958":"真空管式","1960":"真空管式","1963":"トランジスタ式","1965":"トランジスタ式","1968":"トランジスタ式","1970":"トランジスタ・FM付き","1973":"トランジスタ・3バンド","1975":"トランジスタ・3バンド","1978":"トランジスタ・3バンド"},"img":"radio.webp"},{"id":"camera","icon":"📷","cat":"家電","name":"カメラ","label":"カメラ","sub":"35ミリ・1台","p":{"1963":14700,"1965":15700,"1968":23800,"1970":26200,"1973":29200,"1975":36100,"1978":35200,"1980":36020,"1983":33870,"1985":32140,"1988":32670},"cnt":"台","note":"家族旅行や入学式の記念写真に。カメラは一家に一台の宝物でした。","img":"camera.webp"},{"id":"piano","icon":"🎹","cat":"家電","name":"ピアノ","label":"アップライトピアノ","sub":"1台","p":{"1970":197000,"1973":253000,"1975":350000,"1978":350000,"1980":350000,"1983":450000,"1985":450000,"1988":465000},"cnt":"台","note":"昭和40〜50年代、子どもにピアノを習わせる家が増えました。","img":"piano.webp"},{"id":"watch","icon":"⌚","cat":"家電","name":"腕時計","label":"国産の腕時計","sub":"男性用・1個","p":{"1963":4520,"1965":8800,"1968":9000,"1970":9000,"1973":8820,"1975":9370,"1978":26500,"1980":27400,"1983":33650,"1985":30580,"1988":31000},"cnt":"個","note":"就職祝いや入学祝いの定番。昭和44年には世界初のクオーツ腕時計が日本で生まれました。","sy":{"1963":"19石・中級品","1965":"自動巻き・日付つき","1968":"自動巻き・日付つき","1970":"自動巻き・日付つき","1973":"自動巻き・日付つき","1975":"自動巻き・日付つき","1978":"クオーツ","1980":"クオーツ","1983":"クオーツ・金メッキ","1985":"クオーツ・金メッキ","1988":"クオーツ・金メッキ"},"img":"watch.webp"},{"id":"gasconro","icon":"🔥","cat":"家電","name":"ガスこんろ","label":"ガスこんろ","sub":"鋳物・1台","p":{"1958":368,"1960":378,"1963":452,"1965":480,"1968":631,"1970":687},"cnt":"台","note":"かまどや七輪から、ガスの時代へ。マッチで火をつけました。","img":"gasconro.webp"},{"id":"bat","icon":"🚬","cat":"くらし","name":"ゴールデンバット","label":"たばこ「ゴールデンバット」","sub":"20本入り","p":{"1955":30,"1958":30,"1960":30,"1963":30,"1965":30,"1968":30,"1970":30,"1973":30,"1975":40,"1978":40,"1980":50,"1983":70,"1985":70,"1988":90},"cnt":"箱","note":"明治生まれの安いたばこ。昭和25年から49年まで、ずっと30円でした。","img":"bat.webp"},{"id":"peace","icon":"🚬","cat":"くらし","name":"ピース","label":"たばこ「ピース」","sub":"10本入り","p":{"1955":45,"1958":40,"1960":40,"1963":40,"1965":40,"1968":50,"1970":50,"1973":50,"1975":75,"1978":75,"1980":90,"1983":100,"1985":100,"1988":120},"cnt":"箱","note":"紺色の箱に金色のハト。少し高級なたばこでした。","img":"peace.webp"},{"id":"hilite","icon":"🚬","cat":"くらし","name":"ハイライト","label":"たばこ「ハイライト」","sub":"20本入り","p":{"1963":70,"1965":70,"1968":80,"1970":80,"1973":80,"1975":120,"1978":120,"1980":150,"1983":170,"1985":170,"1988":200},"cnt":"箱","note":"昭和35年発売。高度成長期のサラリーマンに人気のたばこでした。","img":"hilite.webp"},{"id":"chickenramen","icon":"🐥","cat":"たべもの","name":"チキンラーメン","label":"チキンラーメン（発売時）","sub":"発売時の値段","p":{"1958":35},"cnt":"袋","note":"昭和33年発売の、世界初のインスタントラーメン。うどん玉が6円ほどの時代でした。","launch":true,"img":"chickenramen.webp"},{"id":"cupnoodle","icon":"🥡","cat":"たべもの","name":"カップヌードル","label":"カップヌードル（発売時）","sub":"発売時の値段","p":{"1971":100},"cnt":"個","note":"昭和46年発売。お店のラーメンが110円のころに100円でした。","now":192,"launch":true,"img":"cupnoodle.webp"},{"id":"burger","icon":"🍔","cat":"たべもの","name":"ハンバーガー","label":"ハンバーガー（日本1号店）","sub":"銀座にできた日本1号店","p":{"1971":80},"cnt":"個","note":"昭和46年、銀座三越に日本初のマクドナルドが開店。歩行者天国で食べ歩くのが話題になりました。","launch":true,"img":"burger.webp"},{"id":"expo","icon":"🎡","cat":"あそび","name":"大阪万博の入場券","label":"大阪万博の入場券（大人）","sub":"大人1枚","p":{"1970":800},"cnt":"枚","note":"半年間で約6,400万人が来場。テーマは「人類の進歩と調和」でした。","launch":true,"img":"expo.webp"},{"id":"casiomini","icon":"🔢","cat":"家電","name":"カシオミニ","label":"電卓「カシオミニ」（発売時）","sub":"発売時の値段","p":{"1972":12800},"cnt":"台","note":"それまでの電卓の3分の1以下の値段で、手のひらサイズ。電卓が一気に身近になりました。","launch":true,"img":"casiomini.webp"},{"id":"gamewatch","icon":"🕹️","cat":"あそび","name":"ゲームウオッチ","label":"ゲームウオッチ（発売時）","sub":"発売時の値段","p":{"1980":5800},"cnt":"台","note":"昭和55年発売。時計つきの携帯ゲームで、子どもたちの大ブームに。","launch":true,"img":"gamewatch.webp"},{"id":"walkman","icon":"🎧","cat":"家電","name":"ウォークマン","label":"ウォークマン（発売時）","sub":"発売時の値段","p":{"1979":33000},"cnt":"台","note":"昭和54年発売。音楽を外へ持ち歩くという、新しい楽しみ方を生みました。","launch":true,"img":"walkman.webp"},{"id":"famicom","icon":"🎮","cat":"あそび","name":"ファミコン","label":"ファミコン（発売時）","sub":"発売時の値段","p":{"1983":14800},"cnt":"台","note":"昭和58年発売。家のテレビでゲームが遊べると、子どもたちに大人気になりました。","launch":true,"img":"famicom.webp"}],"foreign":[{"id":"us_subway","icon":"🗽","cat":"海外","name":"ニューヨークの地下鉄","label":"ニューヨークの地下鉄（1回）","sub":"アメリカ・1回","p":{"1955":54,"1968":72,"1970":108,"1985":215},"usd":{"1955":0.15,"1968":0.2,"1970":0.3,"1985":0.9},"rel":["toden","kokutetsu","taxi"],"note":"どこまで乗っても同じ料金。昭和28年からは、コインの代わりに専用のトークンで乗りました。","cnt":"回","foreign":true},{"id":"us_stamp","icon":"🇺🇸","cat":"海外","name":"アメリカの切手","label":"アメリカの手紙の切手","sub":"アメリカ・封書1通","p":{"1960":14,"1965":18,"1970":22,"1985":53},"usd":{"1960":0.04,"1965":0.05,"1970":0.06,"1985":0.22},"rel":["fusho","hagaki"],"note":"昭和33年から5年間は4セント。1ドル360円の時代、アメリカの手紙は日本の封書の1.5倍ほどでした。","cnt":"回","foreign":true},{"id":"us_gas","icon":"⛽","cat":"海外","name":"アメリカのガソリン","label":"アメリカのガソリン1リットル","sub":"アメリカ・1ガロンの値段から換算","p":{"1960":30,"1970":34,"1980":71},"usd":{"1960":0.08216644649933949,"1970":0.09431968295904887,"1980":0.31466314398943196},"rel":["gas"],"note":"アメリカは1ガロン（約3.8リットル）で売ります。日本のガソリンは昔からアメリカより高めでした。","cnt":"回","foreign":true},{"id":"us_movie","icon":"🎞️","cat":"海外","name":"アメリカの映画館","label":"アメリカの映画館（1回）","sub":"アメリカ・平均料金","p":{"1965":374,"1970":554,"1975":603,"1980":611,"1985":848},"usd":{"1965":1.04,"1970":1.54,"1975":2.03,"1980":2.69,"1985":3.55},"rel":["movie"],"note":"ハリウッド映画の本場。昭和50年代からは、日本の映画館のほうが高くなりました。","cnt":"回","foreign":true},{"id":"us_hershey","icon":"🍫","cat":"海外","name":"アメリカの板チョコ","label":"アメリカの板チョコ（ハーシー）","sub":"アメリカ・1枚","p":{"1960":18,"1965":18},"usd":{"1960":0.05,"1965":0.05},"rel":["choco"],"note":"ハーシーの板チョコは、明治の終わりから昭和44年まで、ずっと5セントでした。","cnt":"回","foreign":true},{"id":"us_burger","icon":"🍔","cat":"海外","name":"アメリカのハンバーガー","label":"アメリカのマクドナルドのハンバーガー","sub":"アメリカ・1個","p":{"1955":54},"usd":{"1955":0.15},"rel":["burger","ramen","udon"],"note":"昭和30年ごろのアメリカのマクドナルドは15セント。日本1号店（昭和46年）の80円より安い計算です。","cnt":"回","foreign":true},{"id":"us_disney","icon":"🏰","cat":"海外","name":"ディズニーランド（アメリカ）","label":"アメリカのディズニーランド入場料","sub":"開園時・大人1人","p":{"1955":360},"usd":{"1955":1.0},"rel":["movie","expo"],"note":"昭和30年、カリフォルニアに開園。入場料は1ドルで、乗りものは別料金でした。","cnt":"回","foreign":true},{"id":"us_wage","icon":"💵","cat":"海外","name":"アメリカの最低賃金","label":"アメリカの最低賃金（1時間）","sub":"アメリカ・1時間","p":{"1965":450,"1970":576,"1980":704},"usd":{"1965":1.25,"1970":1.6,"1980":3.1},"rel":["ramen","curry","coffee","sento"],"note":"1時間はたらいて受け取れる最低の金額。当時の日本の物価とくらべると、アメリカの豊かさがわかります。","cnt":"回","foreign":true}]};
+  const RATE = { 1955: 360, 1958: 360, 1960: 360, 1963: 360, 1965: 360, 1968: 360, 1970: 360, 1975: 297, 1980: 227, 1985: 239 };
+  const TOTAL = 10;
+
+  const ERAS = [
+    { id: "s30", name: "昭和30年代", years: "1955〜1964年", from: 1955, to: 1964, icon: "📺", item: "bwtv", hint: "白黒テレビ・都電・チキンラーメン" },
+    { id: "s40", name: "昭和40年代", years: "1965〜1974年", from: 1965, to: 1974, icon: "🎡", item: "expo", hint: "カラーテレビ・大阪万博・ボウリング" },
+    { id: "s50", name: "昭和50年代", years: "1975〜1984年", from: 1975, to: 1984, icon: "🎧", item: "walkman", hint: "ウォークマン・ゲームウオッチ・学習塾" },
+    { id: "s60", name: "昭和60年代", years: "1985〜1989年", from: 1985, to: 1989, icon: "🎹", item: "piano", hint: "円高のころ・ピアノ・旅館" },
+    { id: "all", name: "いろいろな時代", years: "昭和30年〜63年", from: 1955, to: 1989, icon: "🎲", hint: "時代をまぜこぜにして出題" },
+  ];
+  const ERA_BY_ID = Object.fromEntries(ERAS.map(e => [e.id, e]));
+
+  // ---------- カードを作る ----------
+  const CARDS = [], FOREIGN = [], BY_KEY = {}, BY_ITEM = {};
+  for (const it of DATA.items) {
+    BY_ITEM[it.id] = it;
+    for (const [y, price] of Object.entries(it.p)) {
+      const c = { key: it.id + "-" + y, item: it, year: +y, price };
+      CARDS.push(c); BY_KEY[c.key] = c;
+    }
+  }
+  for (const it of DATA.foreign) {
+    BY_ITEM[it.id] = it;
+    for (const [y, price] of Object.entries(it.p)) {
+      const c = { key: it.id + "-" + y, item: it, year: +y, price, foreign: true, usd: it.usd[y] };
+      FOREIGN.push(c); BY_KEY[c.key] = c;
+    }
+  }
+  const ITEM_COUNT = DATA.items.length;
+  const PRICE_COUNT = CARDS.length;
+
+  // ---------- 表示の小道具 ----------
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
+  const yen = n => Math.round(n).toLocaleString("ja-JP");
+  const showa = y => "昭和" + (y - 1925) + "年";
+  const isApprox = c => !!(c.item.ap && c.item.ap.includes(c.year));
+  const nameOf = c => (c.item.ny && c.item.ny[c.year]) || c.item.name;
+  const subOf = c => (c.item.sy && c.item.sy[c.year]) || c.item.sub;
+  const labelOf = c => (c.item.ny && c.item.ny[c.year]) ? nameOf(c) : c.item.label;
+  const priceText = c => (isApprox(c) || c.foreign ? "約" : "") + yen(c.price) + "円";
+  const rateOf = c => RATE[c.year] || 360;
+  const rateText = c => "1ドル＝" + (rateOf(c) === 360 ? "" : "約") + rateOf(c) + "円";
+  // 品目の写真（画像/<品目ID>.webp）。画像のない品目と、読みこめなかったときは絵文字を出す
+  const IMG_DIR = "画像/";
+  // extra は写真の上に重ねるもの（年の札・判子）
+  function iconHTML(it, cls, tag, extra) {
+    tag = tag || "span";
+    extra = extra || "";
+    if (!it.img) return "<" + tag + ' class="' + cls + '">' + extra + '<span aria-hidden="true">' + it.icon + "</span></" + tag + ">";
+    return "<" + tag + ' class="' + cls + ' photo">' + extra + '<img class="item-img" src="' + IMG_DIR + esc(it.img) +
+      '" alt="" data-icon="' + esc(it.icon) + '"></' + tag + ">";
+  }
+  document.addEventListener("error", e => {
+    const img = e.target;
+    if (!(img instanceof HTMLImageElement) || !img.classList.contains("item-img")) return;
+    img.parentElement.classList.remove("photo");
+    const span = document.createElement("span");
+    span.setAttribute("aria-hidden", "true");
+    span.textContent = img.dataset.icon;
+    img.replaceWith(span);
+  }, true);
+  function usdText(usd) {
+    if (usd < 1) {
+      const cents = usd * 100;
+      return (Math.abs(cents - Math.round(cents)) > 0.05 ? "約" : "") + Math.round(cents) + "セント";
+    }
+    const d = Math.floor(usd), cents = Math.round((usd - d) * 100);
+    return d + "ドル" + (cents ? cents + "セント" : "");
+  }
+  function approxNum(r) {
+    if (r >= 1000) return yen(Math.round(r / 100) * 100);
+    if (r >= 10) return yen(Math.round(r));
+    return String(Math.round(r * 10) / 10);
+  }
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+  function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+  // ---------- 保存（この端末だけ） ----------
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem("showa-nedan:" + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem("showa-nedan:" + k, JSON.stringify(v)); } catch (e) {} },
+  };
+
+  // ---------- 音 ----------
+  let audio = null;
+  function ensureAudio() {
+    try { if (!audio) audio = new (window.AudioContext || window.webkitAudioContext)(); if (audio.state === "suspended") audio.resume(); } catch (e) {}
+  }
+  function tone(freq, start, dur, type, gain) {
+    const t = audio.currentTime + start;
+    const o = audio.createOscillator(), g = audio.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(gain, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g).connect(audio.destination);
+    o.start(t); o.stop(t + dur + 0.05);
+  }
+  function pop(start) {
+    const len = Math.floor(audio.sampleRate * 0.18);
+    const buf = audio.createBuffer(1, len, audio.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
+    const s = audio.createBufferSource(), g = audio.createGain();
+    g.gain.value = 0.35; s.buffer = buf; s.connect(g).connect(audio.destination);
+    s.start(audio.currentTime + start);
+  }
+  function sound(kind) {
+    if (!settings.sound) return;
+    try {
+      ensureAudio(); if (!audio) return;
+      if (kind === "tap") tone(880, 0, 0.08, "sine", 0.12);
+      else if (kind === "ok") { tone(1046, 0, 0.35, "sine", 0.25); tone(784, 0.2, 0.6, "sine", 0.25); }
+      else if (kind === "ng") { tone(180, 0, 0.22, "square", 0.08); tone(180, 0.28, 0.32, "square", 0.08); }
+      else if (kind === "streak") { [784, 988, 1175].forEach((f, i) => tone(f, 0.45 + i * 0.1, 0.3, "triangle", 0.18)); }
+      else if (kind === "kusudama") { pop(0.3); [523, 659, 784, 1046, 784, 1046].forEach((f, i) => tone(f, 0.55 + i * 0.12, 0.35, "triangle", 0.2)); }
+      else if (kind === "end") { [523, 659, 784, 1046].forEach((f, i) => tone(f, i * 0.13, 0.4, "triangle", 0.18)); }
+    } catch (e) {}
+  }
+
+  // ---------- 設定 ----------
+  const settings = { big: store.get("big", false), sound: store.get("sound", true) };
+  function applySettings() {
+    document.documentElement.classList.toggle("big", settings.big);
+    $("btn-font").setAttribute("aria-pressed", String(settings.big));
+    $("btn-font").textContent = settings.big ? "ふつうの字" : "大きい字";
+    $("btn-sound").setAttribute("aria-pressed", String(settings.sound));
+    $("btn-sound").textContent = settings.sound ? "音あり" : "音なし";
+  }
+  $("btn-font").addEventListener("click", () => { settings.big = !settings.big; store.set("big", settings.big); applySettings(); tapFeedback(true); });
+  $("btn-sound").addEventListener("click", () => { settings.sound = !settings.sound; store.set("sound", settings.sound); applySettings(); tapFeedback(true); });
+
+  // ---------- 押したときの手ごたえと、二度押しの防止 ----------
+  const TAP_LOCK = 700;   // 画面が変わったあと、続けて押しても反応しない時間（ミリ秒）
+  const NEXT_WAIT = 650;  // 答えたあと「つぎの問題へ」が押せるようになるまでの時間
+  let lockUntil = 0;
+  const locked = () => performance.now() < lockUntil;
+  const lock = ms => { lockUntil = Math.max(lockUntil, performance.now() + ms); };
+  function tapFeedback(withSound) {
+    if (withSound) sound("tap");
+    try { if (navigator.vibrate) navigator.vibrate(25); } catch (e) {}
+  }
+  // iPhone で、押しているあいだボタンが沈んで見えるようにする
+  document.addEventListener("touchstart", () => {}, { passive: true });
+
+  // ---------- 出題のしくみ ----------
+  let state = { screen: "start" };
+
+  const inEra = (c, era) => c.year >= era.from && c.year <= era.to;
+  const eraPool = id => CARDS.filter(c => inEra(c, ERA_BY_ID[id]));
+  const foreignPool = id => FOREIGN.filter(c => inEra(c, ERA_BY_ID[id]));
+  const recent = () => store.get("recent", []);
+
+  function freshCards(pool) {
+    const free = pool.filter(c => !state.used.includes(c.item.id));
+    const rec = recent();
+    const fresh = free.filter(c => !rec.includes(c.item.id));
+    return fresh.length >= 12 ? fresh : free;
+  }
+
+  function pickNext(cur, pool) {
+    const free = freshCards(pool).filter(c => c.price !== cur.price);
+    const within = (lo, hi) => free.filter(c => {
+      const r = Math.max(c.price, cur.price) / Math.min(c.price, cur.price);
+      return r >= lo && r <= hi;
+    });
+    let p = within(1.25, 4);
+    if (p.length < 4) p = within(1.12, 8);
+    if (!p.length) p = free;
+    return pick(p);
+  }
+
+  function makePlan(eraId) {
+    const plan = Array(TOTAL).fill("hl");
+    const picks = [];
+    for (const s of shuffle([2, 3, 4, 5, 6, 7, 8, 9])) {
+      if (picks.length < 2 && picks.every(p => Math.abs(p - s) > 1)) picks.push(s);
+    }
+    picks.forEach(s => { plan[s] = "pick3"; });
+    if (foreignPool(eraId).length) {
+      const want = Math.random() < 0.5 ? 2 : 1;
+      let n = 0;
+      for (const s of shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9])) {
+        if (n >= want || plan[s] !== "hl") continue;
+        if (plan[s - 1] === "foreign" || plan[s + 1] === "foreign") continue;
+        plan[s] = "foreign"; n++;
+      }
+    }
+    return plan;
+  }
+
+  function niceRound(v) {
+    if (v < 20) return Math.max(1, Math.round(v));
+    if (v < 100) return Math.round(v / 5) * 5;
+    if (v < 1000) return Math.round(v / 10) * 10;
+    if (v < 10000) return Math.round(v / 100) * 100;
+    if (v < 100000) return Math.round(v / 1000) * 1000;
+    return Math.round(v / 10000) * 10000;
+  }
+
+  function makeOptions(c) {
+    const ok = v => v !== c.price && Math.max(v, c.price) / Math.min(v, c.price) >= 1.3;
+    const real = shuffle(Object.entries(c.item.p).map(([y, v]) => v).filter(v => ok(v) && Math.max(v, c.price) / Math.min(v, c.price) <= 8));
+    const made = shuffle([0.35, 0.5, 2, 3].map(f => niceRound(c.price * f)).filter(ok));
+    const chosen = [];
+    for (const v of real.concat(made)) {
+      if (chosen.length >= 2) break;
+      if (chosen.every(w => Math.max(v, w) / Math.min(v, w) >= 1.25)) chosen.push(v);
+    }
+    return chosen.concat([c.price]).sort((a, b) => a - b);
+  }
+
+  function makeForeign(eraId) {
+    const pool = eraPool(eraId);
+    for (const f of shuffle(foreignPool(eraId))) {
+      if (state.used.includes(f.item.id)) continue;
+      const near = eraId === "all" ? 3 : 6;
+      const rel = pool.filter(c => f.item.rel.includes(c.item.id) && c.price !== f.price && Math.abs(c.year - f.year) <= near)
+        .sort((a, b) => (Math.abs(a.year - f.year) - Math.abs(b.year - f.year)) || (f.item.rel.indexOf(a.item.id) - f.item.rel.indexOf(b.item.id)));
+      if (!rel.length) continue;
+      state.used.push(f.item.id);
+      return { type: "foreign", known: rel[0].key, ask: f.key };
+    }
+    return null;
+  }
+
+  function buildQuestion() {
+    const i = state.results.length;
+    const type = state.plan[i];
+    const pool = eraPool(state.era);
+    if (type === "pick3") {
+      const c = pick(freshCards(pool));
+      state.used.push(c.item.id);
+      return { type, ask: c.key, options: makeOptions(c) };
+    }
+    if (type === "foreign") {
+      const q = makeForeign(state.era);
+      if (q) return q;
+    }
+    let known = state.prevKey ? BY_KEY[state.prevKey] : null;
+    if (!known) {
+      known = pick(freshCards(pool).filter(c => c.price >= 10 && c.price <= 5000));
+      state.used.push(known.item.id);
+    }
+    const ask = pickNext(known, pool);
+    state.used.push(ask.item.id);
+    return { type: "hl", known: known.key, ask: ask.key };
+  }
+
+  function newGame(eraId) {
+    ensureAudio();
+    state = { screen: "play", era: eraId, plan: makePlan(eraId), used: [], results: [], streak: 0, bestStreak: 0, prevKey: null, q: null, answered: null };
+    state.q = buildQuestion();
+    render();
+    window.scrollTo({ top: 0 });
+  }
+
+  function answer(choice) {
+    if (state.screen !== "play" || state.answered) return;
+    const q = state.q, ask = BY_KEY[q.ask];
+    let correct;
+    if (q.type === "pick3") correct = q.options[choice] === ask.price;
+    else {
+      const known = BY_KEY[q.known];
+      correct = choice === "high" ? ask.price > known.price : ask.price < known.price;
+    }
+    state.answered = { choice, correct };
+    state.results.push({ type: q.type, known: q.known || null, ask: q.ask, correct });
+    state.streak = correct ? state.streak + 1 : 0;
+    state.bestStreak = Math.max(state.bestStreak, state.streak);
+    sound(correct ? "ok" : "ng");
+    render(true);
+    if (correct && [3, 5, 7, 10].includes(state.streak)) celebrate(state.streak);
+  }
+
+  function next() {
+    if (state.screen !== "play" || !state.answered) return;
+    lock(TAP_LOCK);
+    closeCelebrate();
+    if (state.results.length >= TOTAL) { finish(); return; }
+    state.prevKey = state.q.ask;
+    state.answered = null;
+    state.q = buildQuestion();
+    render();
+    window.scrollTo({ top: 0 });
+  }
+
+  function finish() {
+    const score = state.results.filter(r => r.correct).length;
+    const key = "best:" + state.era;
+    const prevBest = store.get(key, null);
+    const isBest = prevBest === null || score > prevBest;
+    if (isBest) store.set(key, score);
+    const rec = recent();
+    const ids = state.used.filter(id => !rec.includes(id));
+    store.set("recent", ids.concat(rec).slice(0, 70));
+    state = { screen: "result", era: state.era, results: state.results, score, bestStreak: state.bestStreak, isBest, prevBest };
+    sound("end");
+    render();
+    window.scrollTo({ top: 0 });
+  }
+
+  // ---------- お祝い ----------
+  const KANJI = { 3: "三", 5: "五", 7: "七", 10: "十" };
+  let celebrateTimer = null;
+  function closeCelebrate() {
+    clearTimeout(celebrateTimer);
+    const el = $("celebrate");
+    el.hidden = true; el.innerHTML = "";
+  }
+  function celebrate(n) {
+    const el = $("celebrate");
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let html = '<div class="shade"></div>';
+    if (n === 3) {
+      html += '<div class="toast">3連続正解！</div>';
+      sound("streak");
+    } else {
+      const text = n === 10 ? "全問正解" : KANJI[n] + "連続正解";
+      html += '<div class="kusudama" aria-hidden="true"><div class="string"></div><div class="half l"></div><div class="half r"></div>' +
+        '<div class="banner"><span class="iwai">祝</span><span>' + text + "</span></div></div>" +
+        '<p class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">' + (n === 10 ? "全問正解" : n + "連続正解") + "、おめでとうございます</p>";
+      sound("kusudama");
+    }
+    if (!reduce) {
+      const colors = ["#a3301c", "#e3a92b", "#1e3766", "#22553c", "#fff6e2", "#5b3a73"];
+      let bits = "";
+      const count = n === 3 ? 36 : 80;
+      for (let i = 0; i < count; i++) {
+        const left = 50 + (Math.random() * 70 - 35);
+        const dx = (Math.random() * 60 - 30) + "vw";
+        const rot = (Math.random() * 900 - 450) + "deg";
+        const dur = 1.6 + Math.random() * 1.4;
+        const delay = (n === 3 ? 0.1 : 0.55) + Math.random() * 0.4;
+        bits += '<i style="left:' + left + "%;background:" + pick(colors) + ";--dx:" + dx + ";--rot:" + rot +
+          ";animation-duration:" + dur + "s;animation-delay:" + delay + "s;border-radius:" + (Math.random() < 0.5 ? "2px" : "50%") + '"></i>';
+      }
+      html += '<div class="confetti" aria-hidden="true">' + bits + "</div>";
+    }
+    el.innerHTML = html;
+    el.hidden = false;
+    clearTimeout(celebrateTimer);
+    celebrateTimer = setTimeout(closeCelebrate, n === 3 ? 1800 : 3200);
+  }
+
+  // ---------- 描画 ----------
+  // 値札の数字の大きさ：桁が多いほど小さくして看板からはみ出さないようにする
+  const priceTier = v => v >= 10000 ? " long" : v >= 1000 ? " mid" : "";
+
+  // 看板。写真の上に年の札、答えたあとは判子（verdict: "ok" / "miss"）を重ねる
+  function signHTML(c, role, hidePrice, flip, verdict) {
+    const it = c.item;
+    const cls = ["sign", role === "known" ? "" : "ask", c.foreign ? "foreign" : ""].join(" ");
+    const era = '<span class="era">' + showa(c.year) + "</span>";
+    const hanko = verdict
+      ? '<span class="hanko' + (verdict === "ok" ? "" : " miss") + '" aria-hidden="true">' + (verdict === "ok" ? "正解" : "ざん<br>ねん") + "</span>"
+      : "";
+    const tag = hidePrice
+      ? '<div class="tag hidden-price" aria-label="値段はかくれています">？<small>円</small></div>'
+      : '<div class="tag' + priceTier(c.price) + (flip ? " flip" : "") + '">' +
+        (isApprox(c) || c.foreign ? '<span class="approx">約</span>' : "") + yen(c.price) + "<small>円</small></div>";
+    const usd = c.foreign ? '<div class="usd"><b>' + usdText(c.usd) + "</b><span>" + rateText(c) + "</span></div>" : "";
+    // 見出し帯：色だけでなく文字でも「どちらを答えるか」がわかるように
+    const tab = role === "known" ? "くらべる" : role === "quiz" ? "いくら？" : c.foreign ? "アメリカでは？" : "これは？";
+    return '<article class="' + cls + '">' +
+      '<p class="sign-tab">' + tab + "</p>" +
+      iconHTML(it, "sign-icon", "div", era + hanko) +
+      '<h3 class="sign-name">' + esc(nameOf(c)) + "</h3>" +
+      '<p class="sign-sub">' + esc(subOf(c)) + "</p>" +
+      usd + tag + "</article>";
+  }
+
+  function nearestCard(itemId, year, maxGap) {
+    const it = BY_ITEM[itemId];
+    if (!it) return null;
+    let best = null;
+    for (const [y, v] of Object.entries(it.p)) {
+      const gap = Math.abs(+y - year);
+      if (gap <= maxGap && (!best || gap < best.gap)) best = { y: +y, v, gap };
+    }
+    return best;
+  }
+
+  function ratioText(now, then) {
+    const r = now / then;
+    if (r > 0.95 && r < 1.05) return "ほぼ同じ";
+    if (r < 1) return "下がった";
+    return "約" + approxNum(r) + "倍";
+  }
+
+  // 値段のうつりかわり：年と値段を1行ずつ縦に並べる
+  function timelineHTML(c) {
+    const it = c.item;
+    const pts = [];
+    for (const anchor of [1955, 1965, 1975, 1985]) {
+      const n = nearestCard(it.id, anchor, 4);
+      if (n && !pts.some(p => p.y === n.y)) pts.push({ y: n.y, v: n.v });
+    }
+    if (!pts.some(p => p.y === c.year)) pts.push({ y: c.year, v: c.price });
+    pts.sort((a, b) => a.y - b.y);
+    if (pts.length < 2 && !it.now) return "";
+    const approxYears = it.ap || [];
+    const rows = pts.map(p => '<li class="' + (p.y === c.year ? "cur" : "") + '"><span>' + showa(p.y) + "</span><i></i><b>" +
+      ((approxYears.includes(p.y) || c.foreign) ? "約" : "") + yen(p.v) + "円</b></li>");
+    if (it.now) {
+      const ratio = it.noRatio ? "" : ratioText(it.now, c.price);
+      rows.push('<li class="now"><span>いま' + (ratio ? "<small>（" + ratio + "）</small>" : "") + "</span><i></i><b>" + yen(it.now) + "円</b></li>");
+    }
+    const title = c.foreign ? "値段のうつりかわり（日本円にして）" : "値段のうつりかわり（東京）";
+    return '<div class="timeline"><p class="timeline-title">' + title + '</p><ul class="tl">' + rows.join("") + "</ul>" +
+      (it.now && it.nowNote ? '<p class="tl-note">※いまは' + esc(it.nowNote) + "</p>" : "") + "</div>";
+  }
+
+  function renderStart() {
+    $("hero-lead").textContent = "あのころの値段、覚えていますか？";
+    $("burst").innerHTML = "<span>全</span><b>" + ITEM_COUNT + "</b><span>品目</span>";
+    // 時代のボタンは昔の硬い紙の切符。「昭和30年代 ゆき」
+    $("eras").innerHTML = ERAS.map(e => {
+      const best = store.get("best:" + e.id, null);
+      return '<button class="ticket t-' + e.id + '" type="button" data-era="' + e.id + '">' +
+        iconHTML({ icon: e.icon, img: e.item && BY_ITEM[e.item] && BY_ITEM[e.item].img }, "t-photo") +
+        '<span class="t-name">' + e.name + (e.id === "all" ? "" : "<small>ゆき</small>") + "</span>" +
+        '<span class="t-hint">' + e.hint.split("・").map(w => "<span>" + w + "</span>").join("・") + "</span>" +
+        (best !== null ? '<span class="t-best">これまでの最高：' + best + "問 正解</span>" : "") +
+        "</button>";
+    }).join("");
+  }
+
+  function renderPlay(justAnswered) {
+    const q = state.q, ask = BY_KEY[q.ask], known = q.known ? BY_KEY[q.known] : null;
+    const answered = !!state.answered;
+    const ok = answered && state.answered.correct;
+    const num = state.results.length + (answered ? 0 : 1);
+    $("q-num").textContent = num;
+
+    // 問いかけは短く。年は看板の写真の上に出ている
+    const verdict = answered ? (ok ? "ok" : "miss") : "";
+    const board = $("board"), qEl = $("question");
+    if (q.type === "pick3") {
+      board.className = "board single";
+      board.innerHTML = signHTML(ask, "quiz", !answered, justAnswered, verdict);
+      qEl.innerHTML = "<b>" + esc(nameOf(ask)) + "</b>は、いくらだった？";
+    } else {
+      board.className = "board";
+      board.innerHTML = signHTML(known, "known", false, false) + signHTML(ask, "ask", !answered, justAnswered, verdict);
+      qEl.innerHTML = "<b>" + esc(nameOf(ask)) + "</b>は、" + (q.type === "foreign" ? "日本円にすると " : "") +
+        "<b>" + esc(nameOf(known)) + "</b>（" + priceText(known) + "）より";
+    }
+    qEl.hidden = answered;
+
+    const ans = $("answers");
+    if (!answered) {
+      if (q.type === "pick3") {
+        const tall = Math.max(...q.options) >= 10000;
+        ans.className = "answers three" + (tall ? " tall" : "");
+        ans.innerHTML = q.options.map((v, i) => '<button class="big-btn btn-price' + (tall ? "" : v >= 1000 ? " mid" : "") + '" type="button" data-choice="' + i + '">' +
+          yen(v) + "<small>円</small></button>").join("");
+      } else {
+        ans.className = "answers";
+        ans.innerHTML = '<button class="big-btn btn-high" type="button" data-choice="high"><span class="arrow" aria-hidden="true">▲</span>高い</button>' +
+          '<button class="big-btn btn-low" type="button" data-choice="low"><span class="arrow" aria-hidden="true">▼</span>安い</button>';
+      }
+    } else {
+      const last = state.results.length >= TOTAL;
+      ans.className = "answers one";
+      ans.innerHTML = '<button class="big-btn btn-go' + (justAnswered ? " wait" : "") + '" id="btn-next" type="button" data-next="1">' + (last ? "結果を見る" : "つぎの問題へ") + "</button>";
+      if (justAnswered) {
+        const btn = $("btn-next");
+        btn.focus({ preventScroll: true });
+        setTimeout(() => btn.classList.remove("wait"), NEXT_WAIT);
+      }
+    }
+
+    const rv = $("reveal");
+    rv.hidden = !answered;
+    if (!answered) { rv.innerHTML = ""; return; }
+    const choice = state.answered.choice;
+    const mine = q.type === "pick3" ? yen(q.options[choice]) + "円" : "「" + (choice === "high" ? "高い" : "安い") + "」";
+    let compare = "", calc = "";
+    if (q.type === "pick3") {
+      compare = "答えは <b>" + priceText(ask) + "</b> でした。";
+    } else {
+      const higher = ask.price > known.price;
+      // 品物ごとに1行。値段は途中で折り返さない
+      compare = "答えは<b>「" + (higher ? "高い" : "安い") + "」</b>でした。<br>" +
+        esc(nameOf(ask)) + '　<b class="nw">' + priceText(ask) + "</b><br>" +
+        esc(nameOf(known)) + '　<span class="nw">' + priceText(known) + "</span>";
+      if (q.type === "foreign") calc = usdText(ask.usd) + " × " + rateOf(ask) + "円 ＝ 約" + yen(ask.price) + "円";
+    }
+    rv.innerHTML =
+      '<p class="verdict' + (ok ? "" : " miss") + '">' + (ok ? "正解！" : "ざんねん") + "</p>" +
+      '<p class="memo-you">あなたの答え：' + mine + "</p>" +
+      '<p class="memo-compare">' + compare + "</p>" +
+      (calc ? '<p class="memo-calc">' + calc + "</p>" : "") +
+      '<p class="memo-head">なるほどメモ</p>' +
+      '<p class="memo-note">' + esc(ask.item.note) + "</p>" +
+      timelineHTML(ask);
+  }
+
+  function rankOf(score) {
+    if (score === 10) return ["昭和の<br>生き字引", "全問正解！ おみごとです。"];
+    if (score >= 8) return ["物知り<br>番頭さん", "値段の感覚が、しっかり残っています。"];
+    if (score >= 6) return ["なかなかの<br>目利き", "いい調子です。別の時代でもどうぞ。"];
+    if (score >= 4) return ["あと<br>ひと息", "意外な値段がありましたね。"];
+    return ["これから<br>これから", "昔の値段は、いまとずいぶん違いますね。"];
+  }
+
+  function renderResult() {
+    const [title, msg] = rankOf(state.score);
+    let bestLine = "";
+    if (state.isBest && state.prevBest !== null) bestLine = "最高記録を更新しました！";
+    else if (!state.isBest) bestLine = "これまでの最高は " + state.prevBest + "問です。";
+    const finds = state.results.map(r => {
+      const c = BY_KEY[r.ask], it = c.item;
+      const now = it.now ? ' <span class="now">→ いま ' + yen(it.now) + "円</span>" : "";
+      return '<li class="find">' + iconHTML(it, "find-icon") +
+        '<p class="find-year">' + showa(c.year) + (c.foreign ? "・アメリカ" : "") + "</p>" +
+        '<p class="find-name">' + esc(nameOf(c)) + "</p>" +
+        '<p class="find-price"><b>' + priceText(c) + "</b>" + now + "</p></li>";
+    }).join("");
+    // 結果は賞状のような認定証にして、朱印を押す
+    $("screen-result").innerHTML =
+      '<div class="cert"><div class="cert-inner">' +
+        '<p class="cert-title">認定証</p>' +
+        '<p class="cert-score">10問中 <b>' + state.score + "</b> 問 正解</p>" +
+        '<p class="cert-rank">あなたを<b>' + title.replace("<br>", "") + "</b>と認めます</p>" +
+        '<p class="cert-msg">' + esc(msg) + (bestLine ? "<br>" + esc(bestLine) : "") + "</p>" +
+        '<span class="seal" aria-hidden="true">昭和の<br>目利き</span>' +
+      "</div></div>" +
+      '<div><h2 class="finds-title">今日の発見</h2><p class="finds-lead">あのころの値段と、いまの値段です。</p></div>' +
+      '<ul class="finds">' + finds + "</ul>" +
+      '<div class="result-actions">' +
+        '<button class="big-btn btn-go" id="btn-again" type="button">同じ時代でもう一度</button>' +
+        '<button class="big-btn btn-sub" id="btn-era" type="button">時代を選びなおす</button>' +
+      "</div>";
+    $("btn-again").addEventListener("click", e => {
+      if (locked()) return;
+      lock(TAP_LOCK);
+      e.currentTarget.classList.add("chosen");
+      tapFeedback(true);
+      setTimeout(() => newGame(state.era), 200);
+    });
+    $("btn-era").addEventListener("click", () => {
+      if (locked()) return;
+      lock(TAP_LOCK);
+      tapFeedback(true);
+      goHome();
+    });
+  }
+
+  function render(justAnswered) {
+    // 遊んでいる途中は、左上のボタンを「やめる」にする（押すと確認が出る）
+    $("btn-home").hidden = state.screen === "start";
+    $("btn-home").textContent = state.screen === "play" ? "やめる" : "昭和の目利き";
+    $("btn-home").setAttribute("aria-label", state.screen === "play" ? "ゲームをやめる" : "はじめの画面へ");
+    syncVideo();
+    $("screen-start").hidden = state.screen !== "start";
+    $("screen-play").hidden = state.screen !== "play";
+    $("screen-result").hidden = state.screen !== "result";
+    $("source").hidden = state.screen === "play";
+    if (state.screen === "start") renderStart();
+    if (state.screen === "play") renderPlay(!!justAnswered);
+    if (state.screen === "result") renderResult();
+  }
+
+  function goHome() { closeCelebrate(); state = { screen: "start" }; render(); window.scrollTo({ top: 0 }); }
+
+  // ---------- はじめの画面の動画 ----------
+  // 音なしで自動再生（動きを減らす設定の端末では止めておく）。ゲーム中は止めて音も消す
+  const video = $("top-video");
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function videoLabel() {
+    const on = !video.muted && !video.paused;
+    $("btn-video-sound").textContent = on ? "動画の音を消す" : "動画の音を出す";
+    $("btn-video-sound").setAttribute("aria-pressed", String(on));
+  }
+  function syncVideo() {
+    if (state.screen === "start") {
+      if (!reduceMotion || !video.muted) { const p = video.play(); if (p && p.catch) p.catch(() => {}); }
+    } else {
+      video.pause();
+      video.muted = true;
+    }
+    videoLabel();
+  }
+  $("btn-video-sound").addEventListener("click", () => {
+    if (locked()) return;
+    tapFeedback(false);
+    if (video.muted || video.paused) {
+      video.muted = false;
+      const p = video.play(); if (p && p.catch) p.catch(() => {});
+    } else {
+      video.muted = true;
+    }
+    videoLabel();
+  });
+  video.addEventListener("play", videoLabel);
+  video.addEventListener("pause", videoLabel);
+
+  // ---------- 操作 ----------
+  $("eras").addEventListener("click", e => {
+    const b = e.target.closest("[data-era]");
+    if (!b || locked()) return;
+    lock(TAP_LOCK);
+    b.classList.add("chosen");
+    tapFeedback(true);
+    setTimeout(() => newGame(b.dataset.era), 200);
+  });
+  $("answers").addEventListener("click", e => {
+    const b = e.target.closest("[data-choice], [data-next]");
+    if (!b || locked() || b.classList.contains("wait")) return;
+    if (b.dataset.next) { tapFeedback(true); next(); return; }
+    // 押したボタンに印をつけてから、少し間をおいて答え合わせ（正解・不正解の音が鳴る）
+    lock(250 + NEXT_WAIT);
+    b.classList.add("chosen");
+    tapFeedback(false);
+    const v = b.dataset.choice;
+    setTimeout(() => answer(v === "high" || v === "low" ? v : Number(v)), 250);
+  });
+  const openConfirm = () => { $("confirm").hidden = false; $("confirm-no").focus(); };
+  const closeConfirm = () => { $("confirm").hidden = true; };
+  $("btn-home").addEventListener("click", () => {
+    if (locked()) return;
+    tapFeedback(true);
+    if (state.screen === "play") openConfirm(); else goHome();
+  });
+  $("confirm-no").addEventListener("click", () => { tapFeedback(true); closeConfirm(); });
+  $("confirm-yes").addEventListener("click", () => { tapFeedback(true); closeConfirm(); lock(TAP_LOCK); goHome(); });
+  $("confirm").addEventListener("click", e => { if (e.target === $("confirm")) closeConfirm(); });
+  document.addEventListener("keydown", e => {
+    if (!$("confirm").hidden) { if (e.key === "Escape") closeConfirm(); return; }
+    if (state.screen !== "play" || e.altKey || e.ctrlKey || e.metaKey) return;
+    if (state.answered) { if (e.key === "Enter" && document.activeElement === document.body) next(); return; }
+    if (state.q.type === "pick3") { if (["1", "2", "3"].includes(e.key)) answer(Number(e.key) - 1); return; }
+    if (e.key === "ArrowUp" || e.key === "ArrowLeft") { e.preventDefault(); answer("high"); }
+    else if (e.key === "ArrowDown" || e.key === "ArrowRight") { e.preventDefault(); answer("low"); }
+  });
+
+  function start(data) {
+    applySettings();
+    const s = data && data.state;
+    if (s && s.screen === "play" && s.q && BY_KEY[s.q.ask]) state = s;
+    else if (s && s.screen === "result" && Array.isArray(s.results) && s.results.every(r => BY_KEY[r.ask])) state = s;
+    render();
+  }
+  const hot = window.claude && window.claude.hot;
+  if (hot && hot.snapshot) hot.snapshot(() => ({ state }));
+  if (hot && hot.ready) hot.ready(start); else start((hot && hot.data) || {});
+})();
+</script>
