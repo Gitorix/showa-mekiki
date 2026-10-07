@@ -142,9 +142,6 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
   padding: .1em 1em;
   box-shadow: 3px 3px 0 var(--ink);
 }
-/* 縦が短いスマホと大きい字では、「すぐに遊ぶ」が最初の画面に入るよう動画を低く表示する（字幕のある下側を残す） */
-@media (max-height: 760px) { .tv video { aspect-ratio: 16 / 7; object-position: 50% 100%; } }
-:root.big .tv video { aspect-ratio: 16 / 7; object-position: 50% 100%; }
 .tv-sound::before { content: "♪ "; color: var(--shu); }
 .tv-sound[aria-pressed="true"] { background: var(--ai); color: var(--cream); }
 .tv-sound[aria-pressed="true"]::before { color: var(--karashi); }
@@ -696,13 +693,11 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
       <button class="tv-sound" id="btn-video-sound" type="button" aria-pressed="false">動画の音を出す</button>
     </figure>
     <div class="hero">
-      <p class="hero-ribbon" id="hero-ribbon">なつかしの値段あて</p>
       <h1 class="hero-title">昭和の目利き</h1>
-      <p class="hero-sub">高い？ 安い？</p>
     </div>
     <!-- 下へ動かすことを知らなくても始められるよう、最初の画面の中に大きなボタンを置く -->
     <div class="start-cta">
-      <button class="big-btn btn-go btn-quick" id="btn-quick" type="button"><span class="q-main">▶ すぐに遊ぶ</span><span class="q-sub">いろいろな時代から10問</span></button>
+      <button class="big-btn btn-go btn-quick" id="btn-quick" type="button"><span class="q-main">▶ すぐに遊ぶ</span><span class="q-sub">高い？安い？を当てる10問</span></button>
       <button class="more-btn" id="btn-to-eras" type="button">時代を選んで遊ぶ<span class="more-arrow" aria-hidden="true">▼</span></button>
     </div>
     <h2 class="era-title" id="era-title">時代を選んでください</h2>
@@ -1172,7 +1167,6 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
   }
 
   function renderStart() {
-    $("hero-ribbon").textContent = "なつかしの値段あて・全" + ITEM_COUNT + "品目";
     // 時代のボタンは昔の硬い紙の切符。「昭和30年代 ゆき」
     $("eras").innerHTML = ERAS.map(e => {
       const best = store.get("best:" + e.id, null);
