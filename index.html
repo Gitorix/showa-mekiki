@@ -921,6 +921,33 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
 }
 /* END_PLAY_ACCESSIBILITY */
 
+/* START_VIDEO_TOP: 動画を表紙としていちばん上に。すぐ下の「遊びはじめる」まで最初の画面に収める（どの幅でも1列） */
+.app[data-view="start"] { max-width: 32rem; }
+#screen-start { gap: 10px; }
+#screen-start .top-tv { margin: 0; display: flex; flex-direction: column; gap: 6px; }
+#screen-start .top-tv video {
+  display: block; width: 100%; max-width: 100%;
+  aspect-ratio: 16 / 9; height: auto; object-fit: cover;
+  background: var(--ink);
+  border: 4px solid var(--ink); border-radius: 16px;
+  box-shadow: 4px 4px 0 var(--karashi);
+}
+#screen-start .tv-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+#screen-start .tv-actions .tv-sound { min-height: 44px; padding: .2em .3em; font-size: .85rem; line-height: 1.35; }
+#screen-start .launch { position: static; padding: 10px 14px 14px; }
+#screen-start .launch .hero-ribbon { margin: 0; font-size: .85rem; padding-block: .05em; }
+#screen-start .launch .hero-title {
+  margin: 2px 0 8px; padding-right: 0;
+  font-size: 2.2rem; font-size: min(2.2rem, 11vw); line-height: 1.25;
+  letter-spacing: .06em;
+}
+#screen-start .start-primary { margin: 0; }
+#screen-start .start-reassurance { margin: 8px 0 12px; font-size: .9rem; line-height: 1.5; }
+#screen-start .start-rule { margin: 14px 0 4px; font-size: .95rem; line-height: 1.6; }
+#screen-start .start-links { justify-content: flex-start; margin-top: 0; }
+#screen-start .memory-shelf { margin: 0; }
+
+
 /* SUPPLEMENT_AND_ANDROID: 補足を目立たせ、文字を大きくする設定の Android でも写真と文字が重ならないようにする */
 #screen-play .sign-year {
   margin: 0;
@@ -1001,45 +1028,37 @@ button:disabled { cursor: wait; }
     </div>
   </header>
 
-  <!-- はじめの画面：最初の表示内に開始操作を置く -->
+  <!-- はじめの画面：開いたらまず動画（表紙）。すぐ下に題字と「遊びはじめる」を置き、最初の画面に収める -->
   <section id="screen-start" class="stack" aria-labelledby="start-title">
-    <div class="start-grid">
-      <div class="launch">
-        <img class="start-keepsake" src="画像/bwtv.webp" width="512" height="512" alt="" decoding="async">
-        <p class="hero-ribbon">高い？ 安い？</p>
-        <h1 class="hero-title" id="start-title" tabindex="-1">昭和の<span>目利き</span></h1>
-        <p class="hero-lead" id="hero-lead">あのころの値段、覚えていますか？</p>
-        <p class="start-rule">品物の値段をくらべて、<br><b>「高い」か「安い」</b>を選びます。</p>
-        <button class="big-btn btn-high start-primary" id="btn-start" type="button">
-          遊びはじめる <span aria-hidden="true">→</span>
-        </button>
-        <p class="start-reassurance">いろいろな時代から10問<br><strong>時間の制限はありません</strong></p>
-        <button class="big-btn btn-sub start-secondary" id="btn-choose-era" type="button">時代を選んで遊ぶ</button>
-        <div class="start-links">
-          <button class="text-button" id="btn-howto" type="button">遊び方を見る</button>
-          <button class="text-button" id="btn-watch" type="button">動画を見る <span aria-hidden="true">↓</span></button>
-        </div>
+    <figure class="tv top-tv" aria-label="昭和の目利き 紹介映像">
+      <video id="top-video" src="画像/昭和の目利き_トップ動画_v2.mp4" poster="画像/昭和の目利き_トップ動画_ポスター.jpg"
+        muted loop playsinline preload="metadata" aria-label="昭和の教室や町なみの映像（字幕つき）"></video>
+      <div class="tv-actions">
+        <button class="tv-sound" id="btn-video-play" type="button">動画を再生</button>
+        <button class="tv-sound" id="btn-video-sound" type="button" aria-pressed="false" aria-label="動画の音">音を出す</button>
       </div>
-      <div class="memories">
-        <figure class="tv" aria-labelledby="video-title">
-          <figcaption class="video-heading" id="video-title" tabindex="-1">あの日の暮らしへ <span>約1分の映像</span></figcaption>
-          <video id="top-video" src="画像/昭和の目利き_トップ動画_v2.mp4" poster="画像/昭和の目利き_トップ動画_ポスター.jpg"
-            muted loop playsinline preload="metadata" aria-label="昭和の教室や町なみの映像（字幕つき）"></video>
-          <div class="tv-actions">
-            <button class="tv-sound" id="btn-video-play" type="button">動画を再生</button>
-            <button class="tv-sound" id="btn-video-sound" type="button" aria-pressed="false">動画の音を出す</button>
-          </div>
-        </figure>
-        <div class="memory-shelf">
-          <p class="shelf-title">こんな品物、覚えていますか？</p>
-          <div class="memory-strip">
-            <figure><img src="画像/bwtv.webp" width="512" height="512" alt="" decoding="async"><figcaption>白黒テレビ</figcaption></figure>
-            <figure><img src="画像/phone.webp" width="512" height="512" alt="" decoding="async"><figcaption>黒電話</figcaption></figure>
-            <figure><img src="画像/chabudai.webp" width="512" height="512" alt="" decoding="async"><figcaption>ちゃぶ台</figcaption></figure>
-          </div>
-          <p class="item-count" id="burst"></p>
-        </div>
+    </figure>
+    <div class="launch">
+      <p class="hero-ribbon">高い？ 安い？</p>
+      <h1 class="hero-title" id="start-title" tabindex="-1">昭和の目利き</h1>
+      <button class="big-btn btn-high start-primary" id="btn-start" type="button">
+        遊びはじめる <span aria-hidden="true">→</span>
+      </button>
+      <p class="start-reassurance">いろいろな時代から10問・<strong>時間の制限はありません</strong></p>
+      <button class="big-btn btn-sub start-secondary" id="btn-choose-era" type="button">時代を選んで遊ぶ</button>
+      <p class="start-rule">品物の値段をくらべて、<b>「高い」か「安い」</b>を選びます。</p>
+      <div class="start-links">
+        <button class="text-button" id="btn-howto" type="button">遊び方を見る</button>
       </div>
+    </div>
+    <div class="memory-shelf">
+      <p class="shelf-title">こんな品物、覚えていますか？</p>
+      <div class="memory-strip">
+        <figure><img src="画像/bwtv.webp" width="512" height="512" alt="" decoding="async" loading="lazy"><figcaption>白黒テレビ</figcaption></figure>
+        <figure><img src="画像/phone.webp" width="512" height="512" alt="" decoding="async" loading="lazy"><figcaption>黒電話</figcaption></figure>
+        <figure><img src="画像/chabudai.webp" width="512" height="512" alt="" decoding="async" loading="lazy"><figcaption>ちゃぶ台</figcaption></figure>
+      </div>
+      <p class="item-count" id="burst"></p>
     </div>
   </section>
 
@@ -1520,7 +1539,6 @@ button:disabled { cursor: wait; }
   }
 
   function renderStart() {
-    $("hero-lead").textContent = "あのころの値段、覚えていますか？";
     $("burst").textContent = ITEM_COUNT + "のなつかしい品物が登場";
     // 時代のボタンは昔の硬い紙の切符。「昭和30年代 ゆき」
     $("eras").innerHTML = ERAS.map(e => {
@@ -1723,7 +1741,7 @@ button:disabled { cursor: wait; }
   let videoRequested = !reduceMotion.matches;
   function videoLabel() {
     const on = !video.muted;
-    $("btn-video-sound").textContent = on ? "動画の音を消す" : "動画の音を出す";
+    $("btn-video-sound").textContent = on ? "音を消す" : "音を出す";
     $("btn-video-sound").setAttribute("aria-pressed", String(on));
     $("btn-video-play").textContent = video.paused ? "動画を再生" : "動画を止める";
   }
@@ -1763,10 +1781,6 @@ button:disabled { cursor: wait; }
   $("btn-eras-back").addEventListener("click", goHome);
   $("btn-help-back").addEventListener("click", goHome);
   $("btn-howto").addEventListener("click", goHelp);
-  $("btn-watch").addEventListener("click", () => {
-    $("video-title").scrollIntoView({ behavior: reduceMotion.matches ? "auto" : "smooth", block: "start" });
-    $("video-title").focus({ preventScroll: true });
-  });
 
   // 操作が画面の外にあるときだけ、押して移動できる案内を出す。
   const scrollGuide = $("scroll-guide");
