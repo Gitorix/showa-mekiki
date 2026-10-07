@@ -921,6 +921,44 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
 }
 /* END_PLAY_ACCESSIBILITY */
 
+/* SUPPLEMENT_AND_ANDROID: 補足を目立たせ、文字を大きくする設定の Android でも写真と文字が重ならないようにする */
+#screen-play .sign-year {
+  margin: 0;
+  display: inline-block; align-self: center;
+  font-size: .9rem; font-weight: 700; line-height: 1.3;
+  background: var(--karashi); color: var(--ink);
+  border: 2px solid var(--ink); border-radius: 6px;
+  padding: .02em .5em;
+}
+#screen-play .sign-sub {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .15em .4em;
+  margin: 2px 0 0;
+  font-size: 1rem; font-weight: 700; line-height: 1.35;
+  color: var(--ink);
+  background: #fff1c2;
+  border: 3px solid var(--shu);
+  border-radius: 8px;
+  padding: .2em .45em;
+  max-width: 100%;
+}
+#screen-play .sub-label {
+  font-size: .8rem; font-weight: 700; letter-spacing: .1em;
+  background: var(--shu); color: var(--cream);
+  border-radius: 4px; padding: 0 .4em;
+}
+#screen-play .sub-text { min-width: 0; overflow-wrap: anywhere; }
+#screen-play .question .q-sub { color: var(--ink); font-weight: 700; background: #fff1c2; border-radius: 4px; padding-inline: .1em; }
+/* 横長の札（縦に積んだとき）：写真を少し大きく、年・品名・内容・値段を右に */
+@container play (max-width: 15.6em) {
+  #screen-play .sign-inner { grid-template-columns: clamp(104px, 32vw, 150px) minmax(0, 1fr); }
+  #screen-play .sign-inner > .sign-icon, #screen-play .board.single .sign-icon { grid-row: 2 / span 5; }
+  #screen-play .sign-year, #screen-play .sign-sub { justify-self: start; justify-content: flex-start; }
+  #screen-play .sign-sub { font-size: .95rem; }
+}
+:root.big #screen-play .sign-inner > .sign-icon, :root.big #screen-play .board.single .sign-icon { grid-row: 2 / span 5; }
+:root.big #screen-play .sign-year, :root.big #screen-play .sign-sub { justify-self: start; justify-content: flex-start; }
+
+
 
 /* 小さな画面・文字拡大でも、スクロール操作に頼らず次へ進める案内。 */
 .launch { position: relative; }
@@ -1417,7 +1455,6 @@ button:disabled { cursor: wait; }
   function signHTML(c, role, hidePrice, flip, verdict) {
     const it = c.item;
     const cls = ["sign", role === "known" ? "" : "ask", c.foreign ? "foreign" : ""].join(" ");
-    const era = '<span class="era">' + showa(c.year) + "</span>";
     const hanko = verdict
       ? '<span class="hanko' + (verdict === "ok" ? "" : " miss") + '" aria-hidden="true">' + (verdict === "ok" ? "正解" : "ざん<br>ねん") + "</span>"
       : "";
@@ -1430,11 +1467,14 @@ button:disabled { cursor: wait; }
     const tab = role === "known" ? "くらべる" : role === "quiz" ? "いくら？" : c.foreign ? "アメリカは？" : "これは？";
     return '<article class="' + cls + '"><div class="sign-inner">' +
       '<p class="sign-tab">' + tab + "</p>" +
-      iconHTML(it, "sign-icon", "div", era + hanko) +
+      // 年は写真に重ねず品名の上に（文字を大きくする設定でも写真を隠さない）
+      iconHTML(it, "sign-icon", "div", hanko) +
+      '<p class="sign-year">' + showa(c.year) + "</p>" +
       '<h3 class="sign-name">' + esc(nameOf(c)) + "</h3>" +
       // アメリカの札は、いちばんの手がかりのドルの値段を名前のすぐ下に。補足の「アメリカ・」は見出しと重なるので省く
       (c.foreign ? usd : "") +
-      '<p class="sign-sub">' + esc(c.foreign ? subOf(c).replace(/^アメリカ・/, "") : subOf(c)) + "</p>" +
+      // 補足（量・型・中身）は写真だけではわからない大事な手がかり。見出しをつけて目立たせる
+      '<p class="sign-sub"><span class="sub-label">内容</span><span class="sub-text">' + esc(c.foreign ? subOf(c).replace(/^アメリカ・/, "") : subOf(c)) + "</span></p>" +
       (c.foreign ? "" : usd) + tag + "</div></article>";
   }
 
@@ -1507,11 +1547,11 @@ button:disabled { cursor: wait; }
     if (q.type === "pick3") {
       board.className = "board single";
       board.innerHTML = signHTML(ask, "quiz", !answered, justAnswered, verdict);
-      qEl.innerHTML = "<b>" + esc(nameOf(ask)) + "</b>は、いくらだった？";
+      qEl.innerHTML = "<b>" + esc(nameOf(ask)) + '</b><span class="q-sub">（' + esc(subOf(ask)) + "）</span>は、いくらだった？";
     } else {
       board.className = "board";
       board.innerHTML = signHTML(known, "known", false, false) + signHTML(ask, "ask", !answered, justAnswered, verdict);
-      qEl.innerHTML = "<b>" + esc(nameOf(ask)) + "</b>は、" +
+      qEl.innerHTML = "<b>" + esc(nameOf(ask)) + '</b><span class="q-sub">（' + esc(ask.foreign ? subOf(ask).replace(/^アメリカ・/, "") : subOf(ask)) + "）</span>は、" +
         "<b>" + esc(nameOf(known)) + "</b>（" + priceText(known) + "）より";
     }
     qEl.hidden = answered;
