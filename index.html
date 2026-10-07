@@ -59,6 +59,8 @@ body {
   -webkit-tap-highlight-color: transparent;
   word-break: auto-phrase;
   line-break: strict;
+  /* 文字を大きくする設定の端末でも切れないよう、入りきらない言葉は途中で折り返す */
+  overflow-wrap: anywhere;
 }
 b, strong { font-weight: 700; }
 button {
@@ -80,7 +82,7 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
 }
 
 .app {
-  max-width: 32rem;
+  max-width: 28rem;
   margin: 0 auto;
   padding-inline: 16px;
   padding-block: 10px 20px;
@@ -135,7 +137,6 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
 .tv-sound {
   margin-left: auto;
   font-size: .85rem; font-weight: 700;
-  white-space: nowrap;
   background: var(--card);
   border: 2px solid var(--ink);
   border-radius: 999px;
@@ -156,17 +157,14 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
   padding: .15em 1.1em .15em .8em;
   clip-path: polygon(0 0, 100% 0, calc(100% - .6em) 50%, 100% 100%, 0 100%);
 }
-.title-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-/* 大きい字で横に並びきらないときは、ボタンを上に、副題を題字のすぐ上に */
-:root.big .title-row { flex-direction: column-reverse; align-items: flex-start; }
-:root.big .title-row .tv-sound { align-self: flex-end; }
+/* 横に並びきらないときは音ボタンが上の行に回り、副題は題字のすぐ上に残る */
+.title-row { display: flex; flex-wrap: wrap-reverse; align-items: center; justify-content: space-between; gap: 8px; }
 /* 題字は極太だとつぶれて読みにくいので、読みやすいゴシックの太字にする */
 .hero-title {
   margin: 2px 0 0;
   font-weight: 700;
   font-size: 2.6rem; font-size: min(2.6rem, 13vw); line-height: 1.2;
   letter-spacing: .08em;
-  white-space: nowrap;
   color: var(--ink);
   text-shadow: 3px 3px 0 var(--karashi);
 }
@@ -174,12 +172,18 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
   margin: 0;
   font-weight: 700;
   font-size: 1.15rem; line-height: 1.2;
-  white-space: nowrap;
   color: var(--shu);
   letter-spacing: .06em;
 }
 /* 最初の画面の大きなボタン */
 .start-cta { display: flex; flex-direction: column; gap: 10px; }
+/* 文字を大きくする設定などで幅が足りないときは、言葉の途中で折り返さないよう字を少し小さく */
+#screen-start { container: start / inline-size; }
+@container start (max-width: 14em) {
+  #screen-start .btn-quick .q-main { font-size: 1.45rem; }
+  #screen-start .btn-quick .q-sub { font-size: .8rem; }
+  #screen-start .more-btn { font-size: 1rem; }
+}
 .btn-quick { flex-direction: column; gap: 0; min-height: 5rem; line-height: 1.25; letter-spacing: .06em; }
 .btn-quick .q-main { font-size: 1.8rem; }
 .btn-quick .q-sub { font-size: .9rem; font-weight: 400; letter-spacing: .02em; }
@@ -280,35 +284,42 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
 .howto b { color: var(--shu); }
 
 /* ---------- 進み具合 ---------- */
-.progress-count { margin: 0 0 0 auto; font-size: 1.1rem; font-weight: 700; white-space: nowrap; display: flex; align-items: center; gap: .3em; }
+.progress-count { margin: 0 0 0 auto; font-size: 1.1rem; font-weight: 700; display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 0 .3em; min-width: 0; }
 .progress-count b {
   font-family: var(--display); font-weight: 400;
-  font-size: 1.3rem;
-  width: 2.1rem; height: 2.1rem; border-radius: 50%;
+  font-size: 1.15rem;
+  width: 1.85rem; height: 1.85rem; border-radius: 50%;
   display: inline-grid; place-items: center;
   background: var(--shu-fill); color: var(--cream);
 }
-.progress-count span { font-weight: 400; margin-left: .2em; }
+.progress-count span { font-weight: 400; margin-left: .2em; font-size: .85em; }
+.topbar:has(#progress:not([hidden])) { flex-wrap: nowrap; }
+.topbar:has(#progress:not([hidden])) .progress-count { font-size: min(1.1rem, 5.2vw); }
+.topbar:has(#progress:not([hidden])) .brand { font-size: min(1rem, 4.8vw); }
 
 /* ---------- 品物の札 ---------- */
-.board { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.board.single { grid-template-columns: 1fr; }
+/* 札1枚に7.5文字ぶんの幅がとれれば2枚を横に並べ、とれなければ縦に積む（画面幅と文字の大きさの両方で決まる） */
+.board { display: flex; flex-wrap: wrap; gap: .6em; align-items: flex-start; }
 .sign {
   --tone: var(--ai);
-  container-type: inline-size;
+  container: card / inline-size;
+  flex: 1 1 7.5em;
   position: relative;
   min-width: 0;
   background: var(--card);
   border: 3px solid var(--ink);
   border-radius: var(--radius);
   box-shadow: var(--offset) var(--offset) 0 var(--tone);
+  overflow: hidden;
+}
+.sign-inner {
   padding: 0 8px 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   gap: 6px;
-  overflow: hidden;
+  height: 100%;
 }
 .sign.ask { --tone: var(--shu-fill); }
 .sign.foreign { --tone: #5b3a73; }
@@ -344,13 +355,12 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
   background: var(--karashi);
   color: var(--ink);
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 1rem; font-size: min(1rem, 15cqi);
   line-height: 1.3;
   padding: .12em .55em .18em;
   border-right: 2px solid var(--ink);
   border-bottom: 2px solid var(--ink);
   border-radius: 0 0 8px 0;
-  white-space: nowrap;
 }
 .hanko {
   position: absolute; right: 5%; bottom: 5%; z-index: 2;
@@ -370,13 +380,25 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
 .hanko.miss { border-color: var(--ai); color: var(--ai); font-size: .95rem; font-size: min(1.4rem, 12.5cqi); }
 @keyframes hanko { from { transform: rotate(-6deg) scale(1.8); opacity: 0; } }
 .sign-name { margin: 0; font-weight: 700; font-size: 1.25rem; line-height: 1.3; text-wrap: balance; letter-spacing: .02em; }
-.sign-sub { margin: 0; font-size: .85rem; line-height: 1.45; color: var(--ink-soft); text-wrap: balance; }
-.usd {
-  display: flex; flex-direction: column; align-items: center;
-  border: 2px solid var(--ink); border-radius: 8px; padding: .1em .6em;
-  font-size: .85rem; line-height: 1.4;
+/* 補足（量・型・中身）は値段を考える大事な手がかりなので、薄くせず枠に入れて目立たせる */
+.sign-sub {
+  margin: 0;
+  font-size: .95rem; font-weight: 700; line-height: 1.4;
+  color: var(--ink);
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  padding: .15em .5em;
+  text-wrap: balance;
+  max-width: 100%;
 }
-.usd b { font-size: 1.2rem; color: #5b3a73; }
+.board.single .sign-sub { font-size: 1.05rem; }
+.usd {
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 0 .4em;
+  border: 2px solid var(--ink); border-radius: 8px; padding: .05em .5em;
+  font-size: .85rem; line-height: 1.35;
+}
+.usd b { font-size: 1.1rem; color: #5b3a73; }
 
 /* 値段：特売チラシの赤い数字。桁が多いほど小さくして札からはみ出さないようにする */
 .tag {
@@ -405,27 +427,38 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
 
 /* 1枚だけの問題は、写真を札の7割の幅まで大きくする */
 .board.single .sign-icon { width: 72%; }
+/* 縦の短い画面では、写真を少し小さくして名前と補足が下の帯に隠れないようにする */
+@media (max-height: 760px) { .board.single .sign-icon { width: 54%; } }
 .board.single .sign-name { font-size: 1.5rem; }
 
-/* 「大きい字」のときは、写真を左・文字を右にした横長の札を縦に積む */
-:root.big .board { grid-template-columns: 1fr; }
-:root.big .sign {
-  display: grid;
-  grid-template-columns: 44% 1fr;
-  column-gap: 12px; row-gap: 6px;
-  align-items: center; align-content: start;
-  justify-items: start;
-  text-align: left;
-  padding: 0 12px 12px;
+/* 札を縦に積むとき（並べる場所が 7.5文字×2＋すき間 より狭いとき）は、1枚だけの問題もふくめて、写真を左・文字を右にした横長にする */
+#screen-play { container: play / inline-size; }
+@container play (max-width: 15.6em) {
+  .board .sign-inner {
+    display: grid;
+    grid-template-columns: 34% 1fr;
+    column-gap: 10px; row-gap: 4px;
+    align-items: center; align-content: start;
+    justify-items: start;
+    text-align: left;
+    padding: 10px;
+  }
+  /* 見出しは帯にせず、名前の上の小さな札にして高さを詰める */
+  .board .sign-inner > .sign-tab { grid-column: 2; margin: 0; justify-self: start; font-size: .85rem; padding: .1em .7em; border-radius: 999px; letter-spacing: .05em; }
+  .board .sign-inner > .sign-icon { grid-column: 1; grid-row: 1 / span 5; align-self: center; width: 100%; font-size: min(5rem, 22cqi); }
+  .board .sign-inner > :not(.sign-icon):not(.sign-tab) { grid-column: 2; }
+  .board .sign-name { font-size: 1.2rem; }
+  .board .sign-sub { font-size: .85rem; }
+  .board .usd { align-items: flex-start; }
+  .board .tag { font-size: min(2rem, 11cqi); }
+  .board .tag.mid { font-size: min(1.8rem, 9cqi); }
+  .board .tag.long { font-size: min(1.45rem, 7cqi); }
+  /* 札が1枚の問題は写真を少し大きめに */
+  .board.single .sign-inner { grid-template-columns: 42% 1fr; }
+  .board.single .sign-name { font-size: 1.35rem; }
+  .board .sign-name { font-size: 1.15rem; }
+  .board .usd { justify-content: flex-start; }
 }
-:root.big .sign > .sign-tab { grid-column: 1 / -1; margin: 0 -12px 4px; justify-self: stretch; text-align: center; }
-:root.big .sign > .sign-icon { grid-column: 1; grid-row: 2 / span 4; align-self: center; width: 100%; font-size: min(5rem, 22cqi); }
-:root.big .sign > :not(.sign-icon):not(.sign-tab) { grid-column: 2; }
-:root.big .sign-name { font-size: 1.35rem; }
-:root.big .usd { align-items: flex-start; }
-:root.big .tag { font-size: min(2rem, 11cqi); }
-:root.big .tag.mid { font-size: min(1.8rem, 9cqi); }
-:root.big .tag.long { font-size: min(1.45rem, 7cqi); }
 
 /* ---------- 問いかけと答え（画面の下に固定） ---------- */
 .actions {
@@ -440,6 +473,7 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
   border-top: 3px solid var(--ink);
   box-shadow: 0 -8px 16px rgba(38, 32, 27, .18);
   display: flex; flex-direction: column; gap: 10px;
+  container: actions / inline-size;
 }
 .question {
   margin: 0;
@@ -448,13 +482,31 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
   text-align: center;
   text-wrap: balance;
 }
-.question b { color: var(--shu); white-space: nowrap; }
-.answers { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.question b { color: var(--shu); }
+.answers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .answers.three { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .answers.one { grid-template-columns: 1fr; }
-/* 5けた以上の値段や大きい字のときは、3つのボタンを縦に並べる */
-.answers.three.tall, :root.big .answers.three { grid-template-columns: 1fr; }
-.answers.three.tall .btn-price, :root.big .answers.three .btn-price { min-height: 3rem; font-size: 1.4rem; }
+/* 5けた以上の値段や、横に3つ並べる幅がないときは、3つのボタンを縦に並べる */
+.answers.three.tall { grid-template-columns: 1fr; }
+.answers.three.tall .btn-price { min-height: 3rem; font-size: 1.4rem; }
+@container actions (max-width: 16.5em) {
+  .answers.three { grid-template-columns: 1fr; gap: 8px; }
+  .answers.three .btn-price { min-height: 2.7rem; font-size: 1.35rem; }
+}
+/* 「高い／安い」：字のすき間と矢印を控えめにして2つ並べ、それでも幅が足りなければ縦に並べる */
+.answers .btn-high, .answers .btn-low { font-size: 1.85rem; letter-spacing: .02em; padding-inline: .3em; gap: .15em; }
+.answers .big-btn .arrow { font-size: .55em; }
+/* 幅が足りないとき（狭い画面や、文字を大きくする設定）は、▲▼の印を省いて2つ並べたまま、下の帯を低く保つ */
+@container actions (max-width: 13.5em) {
+  .answers:not(.three):not(.one) { gap: 10px; }
+  .answers .btn-high, .answers .btn-low { font-size: 1.6rem; min-height: 3rem; letter-spacing: 0; }
+  .answers .big-btn .arrow { display: none; }
+  .question { font-size: 1rem; line-height: 1.4; }
+}
+/* 狭いときは下の帯の上下の余白も詰める */
+@container play (max-width: 15.6em) {
+  .actions { padding-top: 12px; padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)); gap: 8px; }
+}
 .big-btn {
   font-weight: 700;
   font-size: 2rem;
@@ -474,8 +526,6 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
 /* 出てすぐの「つぎへ」は、続けて押してしまわないよう少しのあいだ押せない */
 .big-btn.wait { opacity: .45; }
 .big-btn .arrow { font-size: .65em; }
-.btn-high, .btn-low { white-space: nowrap; }
-:root.big .btn-high, :root.big .btn-low { font-size: 1.7rem; letter-spacing: .04em; padding-inline: .2em; gap: .2em; }
 .btn-high { background: var(--shu-fill); color: var(--cream); }
 .btn-low { background: var(--ai); color: var(--cream); }
 .btn-go { background: var(--karashi); width: 100%; font-size: 1.6rem; }
@@ -529,7 +579,7 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
   padding: .2em .5em; border-radius: 6px;
   font-variant-numeric: tabular-nums;
 }
-.tl li span { font-size: .95rem; white-space: nowrap; }
+.tl li span { font-size: .95rem; }
 .tl li span small { font-size: .95rem; color: var(--wakatake); font-weight: 700; }
 .tl li i { flex: 1; min-width: 1em; border-bottom: 3px dotted rgba(38, 32, 27, .35); transform: translateY(-.3em); }
 .tl li b { font-size: 1.2rem; white-space: nowrap; }
@@ -685,7 +735,7 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
 <div class="app">
   <header class="topbar">
     <button class="brand" id="btn-home" type="button" aria-label="はじめの画面へ">昭和の目利き</button>
-    <p class="progress-count" id="progress" hidden>第<b id="q-num">1</b>問<span>／ 全10問</span></p>
+    <p class="progress-count" id="progress" hidden>第<b id="q-num">1</b>問<span>（全10問）</span></p>
     <div class="tools" id="tools">
       <button class="chip" id="btn-font" type="button" aria-pressed="false">大きい字</button>
       <button class="chip" id="btn-sound" type="button" aria-pressed="true">音あり</button>
@@ -1128,12 +1178,14 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
     const usd = c.foreign ? '<div class="usd"><b>' + usdText(c.usd) + "</b><span>" + rateText(c) + "</span></div>" : "";
     // 見出し帯：色だけでなく文字でも「どちらを答えるか」がわかるように
     const tab = role === "known" ? "くらべる" : role === "quiz" ? "いくら？" : c.foreign ? "アメリカは？" : "これは？";
-    return '<article class="' + cls + '">' +
+    return '<article class="' + cls + '"><div class="sign-inner">' +
       '<p class="sign-tab">' + tab + "</p>" +
       iconHTML(it, "sign-icon", "div", era + hanko) +
       '<h3 class="sign-name">' + esc(nameOf(c)) + "</h3>" +
-      '<p class="sign-sub">' + esc(subOf(c)) + "</p>" +
-      usd + tag + "</article>";
+      // アメリカの札は、いちばんの手がかりのドルの値段を名前のすぐ下に。補足の「アメリカ・」は見出しと重なるので省く
+      (c.foreign ? usd : "") +
+      '<p class="sign-sub">' + esc(c.foreign ? subOf(c).replace(/^アメリカ・/, "") : subOf(c)) + "</p>" +
+      (c.foreign ? "" : usd) + tag + "</div></article>";
   }
 
   function nearestCard(itemId, year, maxGap) {
@@ -1207,7 +1259,7 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
     } else {
       board.className = "board";
       board.innerHTML = signHTML(known, "known", false, false) + signHTML(ask, "ask", !answered, justAnswered, verdict);
-      qEl.innerHTML = "<b>" + esc(nameOf(ask)) + "</b>は、" + (q.type === "foreign" ? "日本円にすると " : "") +
+      qEl.innerHTML = "<b>" + esc(nameOf(ask)) + "</b>は、" +
         "<b>" + esc(nameOf(known)) + "</b>（" + priceText(known) + "）より";
     }
     qEl.hidden = answered;
