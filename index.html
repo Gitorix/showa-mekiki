@@ -729,45 +729,299 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
   .big-btn, .ticket, .chip, .brand { transition: none; }
   .more-arrow { animation: none; }
 }
+
+/* START_ACCESSIBILITY: 開始ボタンを先に、映像と写真はその隣に。 */
+.app[data-view="start"] { max-width: 58rem; }
+.app[data-view="eras"] { max-width: 38rem; }
+.start-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 26px; align-items: start; }
+.launch { padding: 22px; background: var(--card); border: 2px solid var(--ink); border-radius: 16px; box-shadow: 5px 5px 0 var(--karashi); }
+.launch .hero-ribbon { display: inline-block; font-size: .85rem; }
+.launch .hero-title { font-size: 1.5rem; line-height: 1.2; margin: 16px 0 10px; letter-spacing: .06em; }
+.launch .hero-title span { display: block; font-size: 2.9rem; line-height: 1.2; margin-top: 4px; }
+.launch .hero-lead { margin: 8px 0; font-size: 1rem; line-height: 1.55; }
+.start-rule { margin: 12px 0 18px; font-size: 1rem; line-height: 1.6; }
+.start-rule b { color: var(--shu); }
+.start-primary { width: 100%; font-size: 1.55rem; min-height: 3.7rem; letter-spacing: .02em; }
+.start-reassurance { margin: 10px 0 16px; font-size: .9rem; text-align: center; line-height: 1.65; }
+.start-reassurance strong { color: var(--wakatake); }
+.start-secondary { min-height: 3rem; font-size: 1.1rem; letter-spacing: .02em; }
+.start-links { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; justify-content: space-between; }
+.text-button { background: transparent; border: 0; color: var(--ai); font-size: .9rem; font-weight: 700; min-height: 48px; padding: 6px 0; text-decoration: underline; text-underline-offset: .25em; }
+.memories { display: flex; flex-direction: column; gap: 24px; }
+.video-heading { margin: 0; font-size: 1.05rem; font-weight: 700; line-height: 1.6; }
+.video-heading span { display: inline-block; font-size: .85rem; font-weight: 400; color: var(--ink-soft); margin-left: .5em; }
+.tv video { border-width: 3px; border-radius: 14px; }
+.tv-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tv-actions .tv-sound { align-self: stretch; padding: .4em .2em; font-size: .85rem; min-height: 48px; line-height: 1.5; border-radius: 8px; }
+#btn-video-play::before { content: ""; }
+.memory-shelf { padding: 14px 12px; background: var(--ticket); border-radius: 12px; border: 1px solid #b8a68c; }
+.shelf-title { margin: 0 0 10px; font-size: .9rem; font-weight: 700; text-align: center; }
+.memory-strip { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; }
+.memory-strip figure { margin: 0; text-align: center; min-width: 0; }
+.memory-strip img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: contain; border-radius: 8px; border: 1px solid #b8a68c; }
+.memory-strip figcaption { margin-top: 6px; font-size: .85rem; line-height: 1.45; overflow-wrap: anywhere; }
+.item-count { margin: 12px 0 0; text-align: center; font-size: .85rem; color: var(--ink-soft); }
+.section-lead { margin: 0; font-size: 1rem; }
+#screen-eras .ticket { grid-template-columns: 3.2rem minmax(0,1fr); gap: 3px 12px; padding: 10px; min-height: 90px; }
+#screen-eras .t-photo { width: 3.2rem; height: 3.2rem; font-size: 2rem; grid-row: span 3; }
+#screen-eras .t-name { font-size: 1.12rem; line-height: 1.35; overflow-wrap: anywhere; }
+#screen-eras .t-hint, #screen-eras .t-best { font-size: .85rem; }
+#screen-eras .eras { gap: 12px; }
+#screen-help .howto { gap: 20px; }
+.app[data-view="start"] .source { margin-top: 10px; }
+@media (min-width: 740px) { #screen-eras .eras { grid-template-columns: 1fr 1fr; } #screen-eras .t-all { grid-column: 1 / -1; } }
+@media (max-width: 739px) {
+  .start-grid { grid-template-columns: minmax(0,1fr); gap: 26px; }
+  .launch { padding: 18px 16px; }
+  .launch .hero-title { margin-top: 10px; font-size: 1.25rem; }
+  .launch .hero-title span { font-size: 2.4rem; }
+  .launch .hero-ribbon { font-size: .85rem; letter-spacing: .04em; }
+  .launch .hero-lead { font-size: .95rem; }
+  .start-rule { margin: 10px 0 14px; font-size: .95rem; }
+  .start-reassurance { margin-bottom: 12px; }
+}
+@media (max-width: 360px) { .app { padding-inline: 12px; } .launch { padding-inline: 12px; } .start-primary { font-size: 1.35rem; } .start-secondary { font-size: 1rem; } }
+
+
+/* PLAY_ACCESSIBILITY: readable cards and in-flow primary actions */
+#screen-play { gap: 12px; }
+#screen-play .progress { min-width: 0; }
+#screen-play .board { display: grid; align-items: stretch; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+#screen-play .board.single { grid-template-columns: minmax(0, 1fr); }
+#screen-play .sign-inner {
+  min-width: 0; overflow: visible; gap: 5px;
+  padding: 0 8px 9px;
+}
+#screen-play .sign-inner > * { min-width: 0; max-width: 100%; }
+#screen-play .sign-inner > .sign-tab { max-width: none; margin: 0 -8px 2px; font-size: .9rem; }
+#screen-play .sign-icon {
+  width: 116px; height: 116px;
+  width: clamp(96px, 16dvh, 136px); height: clamp(96px, 16dvh, 136px);
+  max-width: 100%; aspect-ratio: 1; flex: none;
+}
+#screen-play .board.single .sign-icon { width: clamp(108px, 19dvh, 152px); height: clamp(108px, 19dvh, 152px); }
+#screen-play .era { font-size: 17px; padding: .12em .22em .18em; letter-spacing: -.025em; }
+#screen-play .sign-name {
+  font-size: 1.15rem; line-height: 1.35; letter-spacing: 0;
+  overflow-wrap: anywhere; word-break: normal; text-wrap: wrap;
+}
+#screen-play .sign-sub { font-weight: 700; color: var(--ink); overflow-wrap: anywhere; text-wrap: wrap; line-height: 1.4; }
+#screen-play .usd { font-size: .85rem; overflow-wrap: anywhere; }
+#screen-play .tag {
+  font-family: var(--font); font-weight: 700;
+  font-size: 1.65rem; line-height: 1.2; letter-spacing: -.025em;
+}
+#screen-play .tag.mid { font-size: 1.4rem; }
+#screen-play .tag.long { font-size: 1.2rem; }
+#screen-play .tag small, #screen-play .tag .approx,
+#screen-play .btn-price small { font-size: max(17px, .62em); letter-spacing: 0; }
+#screen-play .tag.long .approx { display: block; margin: 0; text-align: left; }
+#screen-play .question { font-size: 1.08rem; line-height: 1.5; overflow-wrap: anywhere; }
+#screen-play .question b { white-space: normal; }
+#screen-play .actions {
+  position: static; margin: 0; padding: 14px 0 0; gap: 10px;
+  box-shadow: none; background: transparent; border-top: 3px double var(--ink);
+}
+#screen-play .answers { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+#screen-play .answers.one { grid-template-columns: minmax(0, 1fr); }
+#screen-play .answers.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+#screen-play .answers.three.tall { grid-template-columns: minmax(0, 1fr); gap: 9px; }
+#screen-play .big-btn { min-width: 0; min-height: 3.65rem; font-size: 1.65rem; letter-spacing: .025em; }
+#screen-play .btn-price { font-family: var(--font); font-weight: 700; font-size: 1.3rem; letter-spacing: 0; }
+#screen-play .btn-price.mid { font-size: 1.2rem; }
+#screen-play .answers.three.tall .btn-price { min-height: 2.8rem; font-size: 1.3rem; }
+#screen-play .reveal { gap: 8px; padding: 12px; box-shadow: 3px 3px 0 var(--ink); }
+#screen-play .verdict { font-size: 1.65rem; line-height: 1.25; }
+#screen-play .memo-compare { font-size: 1.08rem; line-height: 1.45; margin: 0; overflow-wrap: anywhere; }
+#screen-play .memo-compare .nw { white-space: normal; }
+#screen-play .memo-you { font-size: .9rem; line-height: 1.45; }
+.answer-details, .result-details { min-width: 0; }
+.answer-details { border-top: 2px dotted var(--ink-soft); padding-top: 4px; }
+.answer-details > summary, .result-details > summary {
+  cursor: pointer; min-height: 48px; padding-block: 8px;
+  font-size: .95rem; line-height: 1.5; font-weight: 700;
+  overflow-wrap: anywhere; color: var(--ai);
+}
+.answer-details[open] > summary, .result-details[open] > summary { margin-bottom: 8px; }
+.answer-details > .memo-note { margin-block: 10px; }
+.answer-details .tl li { flex-wrap: wrap; }
+.answer-details .tl li span { white-space: normal; }
+#screen-play[data-answered="true"] .sign-icon { width: 96px; height: 96px; }
+#screen-play[data-answered="true"] .sign-sub,
+#screen-play[data-answered="true"] .usd { display: none; }
+#screen-play[data-answered="true"] .hanko { font-size: 17px; border-width: 3px; }
+#screen-play[data-answered="true"] .era { font-size: 17px; }
+#screen-play[data-answered="true"] .actions { padding-top: 0; border-top: 0; }
+:root.big #screen-play .board { display: grid; align-items: stretch; grid-template-columns: minmax(0, 1fr); }
+:root.big #screen-play .sign-inner {
+  grid-template-columns: clamp(98px, 26vw, 108px) minmax(0, 1fr);
+  column-gap: 10px; row-gap: 4px;
+}
+:root.big #screen-play .sign-inner > .sign-icon,
+:root.big #screen-play .board.single .sign-icon {
+  width: 100%; height: auto; aspect-ratio: 1;
+  grid-column: 1; grid-row: 2 / span 4; align-self: center;
+}
+:root.big #screen-play .sign-inner > .sign-tab { grid-column: 1 / -1; }
+:root.big #screen-play .sign-name { font-size: 1.12rem; line-height: 1.3; }
+:root.big #screen-play .sign-sub { font-size: .85rem; }
+:root.big #screen-play .tag { font-size: 1.55rem; }
+:root.big #screen-play .tag.mid { font-size: 1.4rem; }
+:root.big #screen-play .tag.long { font-size: 1.2rem; }
+:root.big #screen-play .question { font-size: 1rem; }
+:root.big #screen-play .answers.three { grid-template-columns: minmax(0, 1fr); gap: 9px; }
+:root.big #screen-play .answers.three .btn-price { min-height: 2.8rem; font-size: 1.3rem; }
+:root.big #screen-play[data-answered="true"] .sign-inner { grid-template-columns: 98px minmax(0, 1fr); }
+:root.big #screen-play[data-answered="true"] .sign-icon { width: 98px; height: 98px; }
+:root.big #screen-play[data-answered="true"] .era { font-size: 17px; }
+#screen-result { gap: 14px; }
+#screen-result .cert-inner { padding: 14px 12px; gap: 7px; }
+#screen-result .cert-title { font-size: 1.35rem; }
+#screen-result .cert-rank b { font-size: 1.4rem; }
+#screen-result .cert-msg { font-size: .95rem; line-height: 1.5; }
+#screen-result .seal { width: 2.8rem; height: 2.8rem; font-size: .75rem; }
+#screen-result .result-actions { display: grid; grid-template-columns: 1fr; gap: 10px; }
+#screen-result .result-actions .big-btn { min-height: 3rem; font-size: 1.2rem; letter-spacing: 0; }
+#screen-result .result-details { border-top: 3px double var(--ink); padding-top: 6px; }
+#screen-result .result-details > summary { font-size: 1.1rem; }
+#screen-result .finds { margin-top: 10px; }
+#screen-result .find-name, #screen-result .find-price { overflow-wrap: anywhere; }
+#progress:focus, #answer-title:focus, #result-title:focus { outline: none; }
+@media (max-height: 720px) and (min-width: 600px) {
+  #screen-play .sign-icon { width: 100px; height: 100px; }
+  #screen-play .board.single .sign-icon { width: 112px; height: 112px; }
+  #screen-play .sign-inner { gap: 4px; }
+  #screen-play .sign-sub { font-size: .85rem; }
+  #screen-play .actions { padding-top: 10px; }
+}
+
+@container play (max-width: 15.6em) {
+#screen-play .board { display: grid; align-items: stretch; grid-template-columns: minmax(0, 1fr); }
+#screen-play .sign-inner {
+  grid-template-columns: clamp(98px, 26vw, 108px) minmax(0, 1fr);
+  column-gap: 10px; row-gap: 4px;
+}
+#screen-play .sign-inner > .sign-icon,
+#screen-play .board.single .sign-icon {
+  width: 100%; height: auto; aspect-ratio: 1;
+  grid-column: 1; grid-row: 2 / span 4; align-self: center;
+}
+#screen-play .sign-inner > .sign-tab { grid-column: 1 / -1; }
+#screen-play .sign-name { font-size: 1.12rem; line-height: 1.3; }
+#screen-play .sign-sub { font-size: .85rem; }
+#screen-play .tag { font-size: 1.55rem; }
+#screen-play .tag.mid { font-size: 1.4rem; }
+#screen-play .tag.long { font-size: 1.2rem; }
+#screen-play .question { font-size: 1rem; }
+#screen-play .answers.three { grid-template-columns: minmax(0, 1fr); gap: 9px; }
+#screen-play .answers.three .btn-price { min-height: 2.8rem; font-size: 1.3rem; }
+#screen-play[data-answered="true"] .sign-inner { grid-template-columns: 98px minmax(0, 1fr); }
+#screen-play[data-answered="true"] .sign-icon { width: 98px; height: 98px; }
+#screen-play[data-answered="true"] .era { font-size: 17px; }
+}
+/* END_PLAY_ACCESSIBILITY */
+
+
+/* 小さな画面・文字拡大でも、スクロール操作に頼らず次へ進める案内。 */
+.launch { position: relative; }
+.start-keepsake { position: absolute; width: 110px; height: 110px; object-fit: contain; top: 82px; right: 22px; border: 1px solid #b8a68c; border-radius: 10px; transform: rotate(3deg); }
+.launch .hero-title { padding-right: 116px; }
+.scroll-guide { position: fixed; z-index: 20; left: 50%; bottom: max(8px,env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(34rem,calc(100% - 24px)); min-height: 58px; padding: 10px 14px; background: var(--ai); color: var(--cream); border: 3px solid var(--cream); border-radius: 12px; box-shadow: 0 2px 12px #26201b55; font-size: 1rem; font-weight: 700; line-height: 1.45; }
+body.has-scroll-guide { padding-bottom: 84px; }
+button:focus-visible, summary:focus-visible { outline: 3px solid var(--cream); outline-offset: 2px; box-shadow: 0 0 0 6px var(--ai); }
+#screen-play .sign-inner > .sign-tab { border-radius: 8px 8px 0 0; }
+@media (max-height: 720px) and (min-width: 600px) {
+  #screen-play .sign-icon { width: 140px; height: 140px; }
+  #screen-play .board.single .sign-icon { width: 144px; height: 144px; }
+}
+@media (max-width: 739px) { .start-keepsake { width: 96px; height: 96px; top: 69px; right: 16px; } .launch .hero-title { padding-right: 98px; } }
+@media (max-width: 360px) {
+  .start-keepsake { width: 78px; height: 78px; right: 12px; }
+  .launch .hero-title { padding-right: 80px; }
+  #screen-play .tag.long { font-size: 1.2rem; white-space: normal; overflow-wrap: anywhere; }
+}
+button:disabled { cursor: wait; }
+#answers button:disabled { opacity: .55; }
+
+/* Latest typography and quantity labels remain intact after merging the layout. */
+.launch .hero-title { font-family: var(--font); font-weight: 700; }
+.tv-actions .tv-sound { margin-left: 0; width: 100%; }
+@media (min-width: 740px) and (max-width: 959px) {
+  .app[data-view="start"] { max-width: 28rem; }
+  .start-grid { grid-template-columns: minmax(0,1fr); }
+}
 </style>
 
 <div class="awning" aria-hidden="true"></div>
 <div class="app">
   <header class="topbar">
     <button class="brand" id="btn-home" type="button" aria-label="はじめの画面へ">昭和の目利き</button>
-    <p class="progress-count" id="progress" hidden>第<b id="q-num">1</b>問<span>（全10問）</span></p>
+    <p class="progress-count" id="progress" tabindex="-1" role="heading" aria-level="2" hidden>第<b id="q-num">1</b>問<span>（全10問）</span></p>
     <div class="tools" id="tools">
       <button class="chip" id="btn-font" type="button" aria-pressed="false">大きい字</button>
       <button class="chip" id="btn-sound" type="button" aria-pressed="true">音あり</button>
     </div>
   </header>
 
-  <!-- はじめの画面 -->
-  <section id="screen-start" class="stack">
-    <figure class="tv">
-      <video id="top-video" src="画像/昭和の目利き_トップ動画_v2.mp4" poster="画像/昭和の目利き_トップ動画_ポスター.jpg"
-        muted loop playsinline preload="auto" aria-label="昭和の教室や町なみの映像（字幕つき）"></video>
-    </figure>
-    <!-- 動画のすぐ下：左に副題、右に動画の音のボタン。その下に題字 -->
-    <div class="hero">
-      <div class="title-row">
-        <p class="hero-sub">高い？ 安い？</p>
-        <button class="tv-sound" id="btn-video-sound" type="button" aria-pressed="false">動画の音を出す</button>
+  <!-- はじめの画面：最初の表示内に開始操作を置く -->
+  <section id="screen-start" class="stack" aria-labelledby="start-title">
+    <div class="start-grid">
+      <div class="launch">
+        <img class="start-keepsake" src="画像/bwtv.webp" width="512" height="512" alt="" decoding="async">
+        <p class="hero-ribbon">高い？ 安い？</p>
+        <h1 class="hero-title" id="start-title" tabindex="-1">昭和の<span>目利き</span></h1>
+        <p class="hero-lead" id="hero-lead">あのころの値段、覚えていますか？</p>
+        <p class="start-rule">品物の値段をくらべて、<br><b>「高い」か「安い」</b>を選びます。</p>
+        <button class="big-btn btn-high start-primary" id="btn-start" type="button">
+          遊びはじめる <span aria-hidden="true">→</span>
+        </button>
+        <p class="start-reassurance">いろいろな時代から10問<br><strong>時間の制限はありません</strong></p>
+        <button class="big-btn btn-sub start-secondary" id="btn-choose-era" type="button">時代を選んで遊ぶ</button>
+        <div class="start-links">
+          <button class="text-button" id="btn-howto" type="button">遊び方を見る</button>
+          <button class="text-button" id="btn-watch" type="button">動画を見る <span aria-hidden="true">↓</span></button>
+        </div>
       </div>
-      <h1 class="hero-title">昭和の目利き</h1>
+      <div class="memories">
+        <figure class="tv" aria-labelledby="video-title">
+          <figcaption class="video-heading" id="video-title" tabindex="-1">あの日の暮らしへ <span>約1分の映像</span></figcaption>
+          <video id="top-video" src="画像/昭和の目利き_トップ動画_v2.mp4" poster="画像/昭和の目利き_トップ動画_ポスター.jpg"
+            muted loop playsinline preload="metadata" aria-label="昭和の教室や町なみの映像（字幕つき）"></video>
+          <div class="tv-actions">
+            <button class="tv-sound" id="btn-video-play" type="button">動画を再生</button>
+            <button class="tv-sound" id="btn-video-sound" type="button" aria-pressed="false">動画の音を出す</button>
+          </div>
+        </figure>
+        <div class="memory-shelf">
+          <p class="shelf-title">こんな品物、覚えていますか？</p>
+          <div class="memory-strip">
+            <figure><img src="画像/bwtv.webp" width="512" height="512" alt="" decoding="async"><figcaption>白黒テレビ</figcaption></figure>
+            <figure><img src="画像/phone.webp" width="512" height="512" alt="" decoding="async"><figcaption>黒電話</figcaption></figure>
+            <figure><img src="画像/chabudai.webp" width="512" height="512" alt="" decoding="async"><figcaption>ちゃぶ台</figcaption></figure>
+          </div>
+          <p class="item-count" id="burst"></p>
+        </div>
+      </div>
     </div>
-    <!-- 下へ動かすことを知らなくても始められるよう、最初の画面の中に大きなボタンを置く -->
-    <div class="start-cta">
-      <button class="big-btn btn-go btn-quick" id="btn-quick" type="button"><span class="q-main">▶ すぐに遊ぶ</span><span class="q-sub">高い？安い？を当てる10問</span></button>
-      <button class="more-btn" id="btn-to-eras" type="button">時代を選んで遊ぶ<span class="more-arrow" aria-hidden="true">▼</span></button>
-    </div>
-    <h2 class="era-title" id="era-title">時代を選んでください</h2>
+  </section>
+
+  <!-- 時代選択は独立した画面。スクロールを知らなくても入口へ進める -->
+  <section id="screen-eras" class="stack" hidden aria-labelledby="era-title">
+    <h1 class="era-title" id="era-title" tabindex="-1">遊ぶ時代を選んでください</h1>
+    <p class="section-lead">好きな時代の札を押すと、はじまります。</p>
     <div class="eras" id="eras"></div>
+    <button class="big-btn btn-sub" id="btn-eras-back" type="button">はじめの画面にもどる</button>
+  </section>
+
+  <section id="screen-help" class="stack" hidden aria-labelledby="help-title">
+    <h1 class="era-title" id="help-title" tabindex="-1">遊び方</h1>
     <ol class="howto">
       <li><span>2つの品物の値段をくらべて、<b>「高い」</b>か<b>「安い」</b>を押します。</span></li>
-      <li><span>全部で<b>10問</b>。時間の制限はありません。</span></li>
-      <li><span>値段を<b>3つから選ぶ</b>問題や、<b>アメリカ</b>とくらべる問題も出ます。</span></li>
+      <li><span>答えを見たら、<b>「つぎの問題へ」</b>を押します。急がなくて大丈夫です。</span></li>
+      <li><span>全部で<b>10問</b>。値段を<b>3つから選ぶ</b>問題や、<b>アメリカ</b>とくらべる問題も出ます。</span></li>
     </ol>
+    <button class="big-btn btn-high" id="btn-help-start" type="button">遊びはじめる →</button>
+    <button class="big-btn btn-sub" id="btn-help-back" type="button">はじめの画面にもどる</button>
   </section>
 
   <!-- 出題 -->
@@ -798,6 +1052,7 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
 </div>
 
 <div class="celebrate" id="celebrate" hidden></div>
+<button class="scroll-guide" id="scroll-guide" type="button" hidden></button>
 
 <script>
 (() => {
@@ -930,11 +1185,11 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
   function applySettings() {
     document.documentElement.classList.toggle("big", settings.big);
     $("btn-font").setAttribute("aria-pressed", String(settings.big));
-    $("btn-font").textContent = settings.big ? "ふつうの字" : "大きい字";
+    $("btn-font").textContent = settings.big ? "標準の文字" : "大きい文字";
     $("btn-sound").setAttribute("aria-pressed", String(settings.sound));
-    $("btn-sound").textContent = settings.sound ? "音あり" : "音なし";
+    $("btn-sound").textContent = settings.sound ? "効果音あり" : "効果音なし";
   }
-  $("btn-font").addEventListener("click", () => { settings.big = !settings.big; store.set("big", settings.big); applySettings(); tapFeedback(true); });
+  $("btn-font").addEventListener("click", () => { settings.big = !settings.big; store.set("big", settings.big); applySettings(); tapFeedback(true); requestAnimationFrame(updateScrollGuide); });
   $("btn-sound").addEventListener("click", () => { settings.sound = !settings.sound; store.set("sound", settings.sound); applySettings(); tapFeedback(true); });
 
   // ---------- 押したときの手ごたえと、二度押しの防止 ----------
@@ -1060,6 +1315,7 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
     state.q = buildQuestion();
     render();
     window.scrollTo({ top: 0 });
+    requestAnimationFrame(() => { const target = $("progress"); if (target && !target.closest("[hidden]")) target.focus({ preventScroll: true }); });
   }
 
   function answer(choice) {
@@ -1078,15 +1334,7 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
     sound(correct ? "ok" : "ng");
     render(true);
     if (correct && [3, 5, 7, 10].includes(state.streak)) celebrate(state.streak);
-    // 札の判子を見てもらってから、「正解！」と説明が見える位置まで、ゆっくり画面を動かす
-    const qAt = state.results.length;
-    setTimeout(() => {
-      if (state.screen !== "play" || state.results.length !== qAt) return;
-      const top = $("reveal").getBoundingClientRect().top;
-      if (top > window.innerHeight * 0.4) {
-        window.scrollTo({ top: window.scrollY + top - 12, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
-      }
-    }, 900);
+
   }
 
   function next() {
@@ -1099,6 +1347,7 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
     state.q = buildQuestion();
     render();
     window.scrollTo({ top: 0 });
+    requestAnimationFrame(() => { const target = $("progress"); if (target && !target.closest("[hidden]")) target.focus({ preventScroll: true }); });
   }
 
   function finish() {
@@ -1114,6 +1363,7 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
     sound("end");
     render();
     window.scrollTo({ top: 0 });
+    requestAnimationFrame(() => { const target = $("result-title"); if (target && !target.closest("[hidden]")) target.focus({ preventScroll: true }); });
   }
 
   // ---------- お祝い ----------
@@ -1230,13 +1480,15 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
   }
 
   function renderStart() {
+    $("hero-lead").textContent = "あのころの値段、覚えていますか？";
+    $("burst").textContent = ITEM_COUNT + "のなつかしい品物が登場";
     // 時代のボタンは昔の硬い紙の切符。「昭和30年代 ゆき」
     $("eras").innerHTML = ERAS.map(e => {
       const best = store.get("best:" + e.id, null);
       return '<button class="ticket t-' + e.id + '" type="button" data-era="' + e.id + '">' +
         iconHTML({ icon: e.icon, img: e.item && BY_ITEM[e.item] && BY_ITEM[e.item].img }, "t-photo") +
         '<span class="t-name">' + e.name + (e.id === "all" ? "" : "<small>ゆき</small>") + "</span>" +
-        '<span class="t-hint">' + e.hint.split("・").map(w => "<span>" + w + "</span>").join("・") + "</span>" +
+        '<span class="t-hint">' + e.years + "</span>" +
         (best !== null ? '<span class="t-best">これまでの最高：' + best + "問 正解</span>" : "") +
         "</button>";
     }).join("");
@@ -1248,8 +1500,8 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
     const ok = answered && state.answered.correct;
     const num = state.results.length + (answered ? 0 : 1);
     $("q-num").textContent = num;
+    $("screen-play").dataset.answered = String(answered);
 
-    // 問いかけは短く。年は看板の写真の上に出ている
     const verdict = answered ? (ok ? "ok" : "miss") : "";
     const board = $("board"), qEl = $("question");
     if (q.type === "pick3") {
@@ -1279,12 +1531,26 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
     } else {
       const last = state.results.length >= TOTAL;
       ans.className = "answers one";
-      ans.innerHTML = '<button class="big-btn btn-go' + (justAnswered ? " wait" : "") + '" id="btn-next" type="button" data-next="1">' + (last ? "結果を見る" : "つぎの問題へ") + "</button>";
+      ans.innerHTML = '<button class="big-btn btn-go' + (justAnswered ? " wait" : "") + '" id="btn-next" type="button" data-next="1"' +
+        (justAnswered ? ' disabled aria-disabled="true"' : '') + '>' + (last ? "結果を見る" : "つぎの問題へ") + "</button>";
       if (justAnswered) {
         const btn = $("btn-next");
-        btn.focus({ preventScroll: true });
-        setTimeout(() => btn.classList.remove("wait"), NEXT_WAIT);
+        setTimeout(() => {
+          if (!btn.isConnected) return;
+          btn.classList.remove("wait");
+          btn.disabled = false;
+          btn.removeAttribute("aria-disabled");
+        }, NEXT_WAIT);
       }
+    }
+
+    // 連打防止中も、画面上で押せない状態を明確にする。
+    if (!answered && locked()) {
+      const pendingButtons = Array.from(ans.querySelectorAll("button"));
+      pendingButtons.forEach(button => { button.disabled = true; });
+      setTimeout(() => pendingButtons.forEach(button => {
+        if (button.isConnected) button.disabled = false;
+      }), Math.max(0, lockUntil - performance.now()) + 10);
     }
 
     const rv = $("reveal");
@@ -1294,24 +1560,35 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
     const mine = q.type === "pick3" ? yen(q.options[choice]) + "円" : "「" + (choice === "high" ? "高い" : "安い") + "」";
     let compare = "", calc = "";
     if (q.type === "pick3") {
-      compare = "答えは <b>" + priceText(ask) + "</b> でした。";
+      compare = esc(nameOf(ask)) + "は <b>" + priceText(ask) + "</b> でした。";
     } else {
       const higher = ask.price > known.price;
-      // 品物ごとに1行。値段は途中で折り返さない
-      compare = "答えは<b>「" + (higher ? "高い" : "安い") + "」</b>でした。<br>" +
-        esc(nameOf(ask)) + '　<b class="nw">' + priceText(ask) + "</b><br>" +
-        esc(nameOf(known)) + '　<span class="nw">' + priceText(known) + "</span>";
+      compare = "答えは<b>「" + (higher ? "高い" : "安い") + "」</b>。<br>" +
+        esc(nameOf(ask)) + 'は <b>' + priceText(ask) + "</b> でした。";
       if (q.type === "foreign") calc = usdText(ask.usd) + " × " + rateOf(ask) + "円 ＝ 約" + yen(ask.price) + "円";
     }
     rv.innerHTML =
-      '<p class="verdict' + (ok ? "" : " miss") + '">' + (ok ? "正解！" : "ざんねん") + "</p>" +
-      '<p class="memo-you">あなたの答え：' + mine + "</p>" +
+      '<h2 class="verdict' + (ok ? "" : " miss") + '" id="answer-title" tabindex="-1">' + (ok ? "正解！" : "ざんねん") + "</h2>" +
       '<p class="memo-score">ここまで <b>' + state.results.filter(r => r.correct).length + "問</b> 正解（" + state.results.length + "問中）</p>" +
       '<p class="memo-compare">' + compare + "</p>" +
-      (calc ? '<p class="memo-calc">' + calc + "</p>" : "") +
-      '<p class="memo-head">なるほどメモ</p>' +
-      '<p class="memo-note">' + esc(ask.item.note) + "</p>" +
-      timelineHTML(ask);
+      '<details class="answer-details"><summary>なるほどメモ・値段のうつりかわり</summary>' +
+        '<p class="memo-you">あなたの答え：' + mine + "</p>" +
+        (known ? '<p class="memo-you">くらべた品物：' + esc(nameOf(known)) + "　" + priceText(known) + "</p>" : "") +
+        (calc ? '<p class="memo-calc">' + calc + "</p>" : "") +
+        '<p class="memo-note">' + esc(ask.item.note) + "</p>" + timelineHTML(ask) +
+      "</details>";
+    if (justAnswered) {
+      requestAnimationFrame(() => {
+        const heading = $("answer-title");
+        if (heading && state.screen === "play" && state.answered) {
+          const nextButton = $("btn-next");
+          if (nextButton && nextButton.getBoundingClientRect().bottom > window.innerHeight - 12) {
+            nextButton.scrollIntoView({ block: "center", behavior: "auto" });
+          }
+          heading.focus({ preventScroll: true });
+        }
+      });
+    }
   }
 
   function rankOf(score) {
@@ -1335,21 +1612,22 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
         '<p class="find-name">' + esc(nameOf(c)) + "</p>" +
         '<p class="find-price"><b>' + priceText(c) + "</b>" + now + "</p></li>";
     }).join("");
-    // 結果は賞状のような認定証にして、朱印を押す
     $("screen-result").innerHTML =
       '<div class="cert"><div class="cert-inner">' +
-        '<p class="cert-title">認定証</p>' +
+        '<h2 class="cert-title" id="result-title" tabindex="-1">認定証</h2>' +
         '<p class="cert-score">10問中 <b>' + state.score + "</b> 問 正解</p>" +
         '<p class="cert-rank">あなたを<b>' + title.replace("<br>", "") + "</b>と認めます</p>" +
         '<p class="cert-msg">' + esc(msg) + (bestLine ? "<br>" + esc(bestLine) : "") + "</p>" +
         '<span class="seal" aria-hidden="true">昭和の<br>目利き</span>' +
       "</div></div>" +
-      '<div><h2 class="finds-title">今日の発見</h2><p class="finds-lead">あのころの値段と、いまの値段です。</p></div>' +
-      '<ul class="finds">' + finds + "</ul>" +
-      '<div class="actions result-actions">' +
+      '<div class="result-actions">' +
         '<button class="big-btn btn-go" id="btn-again" type="button">同じ時代でもう一度</button>' +
         '<button class="big-btn btn-sub" id="btn-era" type="button">時代を選びなおす</button>' +
-      "</div>";
+      "</div>" +
+      '<details class="result-details"><summary>今日の発見を見る（10品目）</summary>' +
+        '<p class="finds-lead">あのころの値段と、いまの値段です。</p>' +
+        '<ul class="finds">' + finds + "</ul>" +
+      "</details>";
     $("btn-again").addEventListener("click", e => {
       if (locked()) return;
       lock(TAP_LOCK);
@@ -1361,77 +1639,146 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
       if (locked()) return;
       lock(TAP_LOCK);
       tapFeedback(true);
-      goHome();
-      $("era-title").scrollIntoView({ block: "start" });
+      goEras();
     });
   }
 
   function render(justAnswered) {
     // 遊んでいる途中は、左上のボタンを「やめる」にする（押すと確認が出る）
     $("btn-home").hidden = state.screen === "start";
-    $("btn-home").textContent = state.screen === "play" ? "やめる" : "昭和の目利き";
+    $("btn-home").textContent = state.screen === "play" ? "やめる" : "はじめへ";
     $("btn-home").setAttribute("aria-label", state.screen === "play" ? "ゲームをやめる" : "はじめの画面へ");
+    document.querySelector(".app").dataset.view = state.screen;
     $("progress").hidden = state.screen !== "play";
     $("tools").hidden = state.screen === "play";
     syncVideo();
+    $("screen-eras").hidden = state.screen !== "eras";
+    $("screen-help").hidden = state.screen !== "help";
     $("screen-start").hidden = state.screen !== "start";
     $("screen-play").hidden = state.screen !== "play";
     $("screen-result").hidden = state.screen !== "result";
-    $("source").hidden = state.screen === "play";
-    if (state.screen === "start") renderStart();
+    $("source").hidden = state.screen !== "start" && state.screen !== "result";
+    if (state.screen === "start" || state.screen === "eras") renderStart();
     if (state.screen === "play") renderPlay(!!justAnswered);
     if (state.screen === "result") renderResult();
+    requestAnimationFrame(updateScrollGuide);
   }
 
-  function goHome() { closeCelebrate(); state = { screen: "start" }; render(); window.scrollTo({ top: 0 }); }
+  function goHome() {
+    closeCelebrate(); state = { screen: "start" }; render();
+    window.scrollTo({ top: 0 }); $("start-title").focus({ preventScroll: true });
+  }
+  function goEras() {
+    closeCelebrate(); state = { screen: "eras" }; render();
+    window.scrollTo({ top: 0 }); $("era-title").focus({ preventScroll: true });
+  }
+  function goHelp() {
+    state = { screen: "help" }; render();
+    window.scrollTo({ top: 0 }); $("help-title").focus({ preventScroll: true });
+  }
 
-  // ---------- はじめの画面の動画 ----------
-  // 音なしで自動再生（動きを減らす設定の端末では止めておく）。ゲーム中は止めて音も消す
+  // 動画はいつでも止められる。手動停止を画面復帰で解除しない。
   const video = $("top-video");
-  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
+  let videoRequested = !reduceMotion.matches;
   function videoLabel() {
-    const on = !video.muted && !video.paused;
+    const on = !video.muted;
     $("btn-video-sound").textContent = on ? "動画の音を消す" : "動画の音を出す";
     $("btn-video-sound").setAttribute("aria-pressed", String(on));
+    $("btn-video-play").textContent = video.paused ? "動画を再生" : "動画を止める";
   }
   function syncVideo() {
-    if (state.screen === "start") {
-      if (!reduceMotion || !video.muted) { const p = video.play(); if (p && p.catch) p.catch(() => {}); }
+    if (state.screen === "start" && !document.hidden && videoRequested) {
+      const p = video.play();
+      if (p && p.catch) p.catch(videoLabel);
     } else {
       video.pause();
-      video.muted = true;
+      if (state.screen !== "start") video.muted = true;
     }
     videoLabel();
   }
+  $("btn-video-play").addEventListener("click", () => {
+    videoRequested = video.paused;
+    syncVideo();
+  });
   $("btn-video-sound").addEventListener("click", () => {
-    if (locked()) return;
-    tapFeedback(false);
-    if (video.muted || video.paused) {
-      video.muted = false;
-      const p = video.play(); if (p && p.catch) p.catch(() => {});
-    } else {
-      video.muted = true;
-    }
-    videoLabel();
+    video.muted = !video.muted;
+    if (!video.muted) videoRequested = true;
+    syncVideo();
   });
   video.addEventListener("play", videoLabel);
   video.addEventListener("pause", videoLabel);
-  // 別のアプリから戻ったときや、読み込みが間に合ったときに、はじめの画面なら再生を続ける
-  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") syncVideo(); });
-  video.addEventListener("canplay", () => { if (state.screen === "start" && video.paused && !reduceMotion) syncVideo(); }, { once: true });
+  video.addEventListener("volumechange", videoLabel);
+  document.addEventListener("visibilitychange", syncVideo);
+  reduceMotion.addEventListener("change", e => { if (e.matches) { videoRequested = false; syncVideo(); } });
+  video.addEventListener("canplay", syncVideo, { once: true });
+
+  function startMixed() {
+    if (locked()) return;
+    lock(TAP_LOCK); tapFeedback(true); newGame("all");
+  }
+  $("btn-start").addEventListener("click", startMixed);
+  $("btn-help-start").addEventListener("click", startMixed);
+  $("btn-choose-era").addEventListener("click", goEras);
+  $("btn-eras-back").addEventListener("click", goHome);
+  $("btn-help-back").addEventListener("click", goHome);
+  $("btn-howto").addEventListener("click", goHelp);
+  $("btn-watch").addEventListener("click", () => {
+    $("video-title").scrollIntoView({ behavior: reduceMotion.matches ? "auto" : "smooth", block: "start" });
+    $("video-title").focus({ preventScroll: true });
+  });
+
+  // 操作が画面の外にあるときだけ、押して移動できる案内を出す。
+  const scrollGuide = $("scroll-guide");
+  let guideTarget = null;
+  let guideFrame = 0;
+  function updateScrollGuide() {
+    guideFrame = 0;
+    let target = null, label = "";
+    if (!$("confirm").hidden) {
+      scrollGuide.hidden = true;
+      document.body.classList.remove("has-scroll-guide");
+      return;
+    }
+    if (state.screen === "start") { target = $("btn-start"); label = "遊びはじめるボタンへ ↓"; }
+    if (state.screen === "eras") {
+      target = Array.from($("eras").children).find(el => el.getBoundingClientRect().bottom > innerHeight - 8);
+      label = "下の時代も見る ↓";
+    }
+    if (state.screen === "help") { target = $("btn-help-start"); label = "遊びはじめるボタンへ ↓"; }
+    if (state.screen === "play") {
+      target = state.answered ? $("btn-next") : $("answers");
+      label = state.answered ? "つぎへ進むボタンを見る ↓" : "答えのボタンを見る ↓";
+    }
+    if (state.screen === "result") { target = $("btn-again"); label = "もう一度遊ぶボタンへ ↓"; }
+    const targetRect = target && target.getBoundingClientRect();
+    const aboveStart = state.screen === "start" && targetRect && targetRect.top < 0;
+    if (aboveStart) label = "遊びはじめるボタンへ ↑";
+    const needsGuide = aboveStart || (targetRect && targetRect.top >= 0 && targetRect.bottom > innerHeight - 8);
+    guideTarget = needsGuide ? target : null;
+    scrollGuide.hidden = !needsGuide;
+    document.body.classList.toggle("has-scroll-guide", !!needsGuide);
+    if (needsGuide) scrollGuide.textContent = label;
+  }
+  function scheduleGuide() {
+    if (!guideFrame) guideFrame = requestAnimationFrame(updateScrollGuide);
+  }
+  scrollGuide.addEventListener("click", () => {
+    const target = guideTarget;
+    if (!target) return;
+    // 最後の操作に余白を確保してから、手動スクロールなしで表示する。
+    target.scrollIntoView({ block: "center", behavior: "auto" });
+    const focusTarget = target.matches("button") ? target : target.querySelector("button");
+    if (focusTarget) focusTarget.focus({ preventScroll: true });
+    requestAnimationFrame(updateScrollGuide);
+  });
+  window.addEventListener("resize", scheduleGuide);
+  window.addEventListener("scroll", scheduleGuide, { passive: true });
+  document.addEventListener("toggle", scheduleGuide, true);
+  new ResizeObserver(scheduleGuide).observe(document.querySelector(".app"));
+  document.fonts.ready.then(scheduleGuide);
 
   // ---------- 操作 ----------
-  $("btn-quick").addEventListener("click", e => {
-    if (locked()) return;
-    lock(TAP_LOCK);
-    e.currentTarget.classList.add("chosen");
-    tapFeedback(true);
-    setTimeout(() => newGame("all"), 200);
-  });
-  $("btn-to-eras").addEventListener("click", () => {
-    tapFeedback(true);
-    $("era-title").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
-  });
   $("eras").addEventListener("click", e => {
     const b = e.target.closest("[data-era]");
     if (!b || locked()) return;
@@ -1451,8 +1798,21 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
     const v = b.dataset.choice;
     setTimeout(() => answer(v === "high" || v === "low" ? v : Number(v)), 250);
   });
-  const openConfirm = () => { $("confirm").hidden = false; $("confirm-no").focus(); };
-  const closeConfirm = () => { $("confirm").hidden = true; };
+  let confirmReturnFocus = null;
+  const openConfirm = () => {
+    confirmReturnFocus = document.activeElement;
+    $("confirm").hidden = false;
+    document.querySelector(".app").inert = true;
+    updateScrollGuide();
+    $("confirm-no").focus();
+  };
+  const closeConfirm = () => {
+    $("confirm").hidden = true;
+    document.querySelector(".app").inert = false;
+    if (confirmReturnFocus && confirmReturnFocus.isConnected) confirmReturnFocus.focus({ preventScroll: true });
+    confirmReturnFocus = null;
+    requestAnimationFrame(updateScrollGuide);
+  };
   $("btn-home").addEventListener("click", () => {
     if (locked()) return;
     tapFeedback(true);
@@ -1462,12 +1822,21 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
   $("confirm-yes").addEventListener("click", () => { tapFeedback(true); closeConfirm(); lock(TAP_LOCK); goHome(); });
   $("confirm").addEventListener("click", e => { if (e.target === $("confirm")) closeConfirm(); });
   document.addEventListener("keydown", e => {
-    if (!$("confirm").hidden) { if (e.key === "Escape") closeConfirm(); return; }
-    if (state.screen !== "play" || e.altKey || e.ctrlKey || e.metaKey) return;
-    if (state.answered) { if (e.key === "Enter" && document.activeElement === document.body) next(); return; }
-    if (state.q.type === "pick3") { if (["1", "2", "3"].includes(e.key)) answer(Number(e.key) - 1); return; }
-    if (e.key === "ArrowUp" || e.key === "ArrowLeft") { e.preventDefault(); answer("high"); }
-    else if (e.key === "ArrowDown" || e.key === "ArrowRight") { e.preventDefault(); answer("low"); }
+    if ($("confirm").hidden) return;
+    if (e.key === "Escape") {
+      e.preventDefault();
+      closeConfirm();
+      return;
+    }
+    if (e.key !== "Tab") return;
+    const controls = Array.from($("confirm").querySelectorAll('button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'));
+    const first = controls[0], last = controls[controls.length - 1];
+    if (!first) { e.preventDefault(); return; }
+    if (e.shiftKey && (document.activeElement === first || !$("confirm").contains(document.activeElement))) {
+      e.preventDefault(); last.focus();
+    } else if (!e.shiftKey && (document.activeElement === last || !$("confirm").contains(document.activeElement))) {
+      e.preventDefault(); first.focus();
+    }
   });
 
   function start(data) {
