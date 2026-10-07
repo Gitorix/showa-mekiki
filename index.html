@@ -133,13 +133,14 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
 }
 /* 動画の音ボタンは動画の外、右下に置く（動画の字幕や絵に重ねない） */
 .tv-sound {
-  align-self: flex-end;
-  font-size: .9rem; font-weight: 700;
+  margin-left: auto;
+  font-size: .85rem; font-weight: 700;
+  white-space: nowrap;
   background: var(--card);
   border: 2px solid var(--ink);
   border-radius: 999px;
   min-height: 2.6rem;
-  padding: .1em 1em;
+  padding: .1em .7em;
   box-shadow: 3px 3px 0 var(--ink);
 }
 .tv-sound::before { content: "♪ "; color: var(--shu); }
@@ -155,19 +156,25 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
   padding: .15em 1.1em .15em .8em;
   clip-path: polygon(0 0, 100% 0, calc(100% - .6em) 50%, 100% 100%, 0 100%);
 }
+.title-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+/* 大きい字で横に並びきらないときは、ボタンを上に、副題を題字のすぐ上に */
+:root.big .title-row { flex-direction: column-reverse; align-items: flex-start; }
+:root.big .title-row .tv-sound { align-self: flex-end; }
+/* 題字は極太だとつぶれて読みにくいので、読みやすいゴシックの太字にする */
 .hero-title {
-  margin: 6px 0 0;
-  font-family: var(--display); font-weight: 400;
-  font-size: 2.6rem; font-size: min(2.6rem, 14vw); line-height: 1.15;
-  letter-spacing: .04em;
+  margin: 2px 0 0;
+  font-weight: 700;
+  font-size: 2.6rem; font-size: min(2.6rem, 13vw); line-height: 1.2;
+  letter-spacing: .08em;
   white-space: nowrap;
   color: var(--ink);
-  text-shadow: var(--offset) var(--offset) 0 var(--karashi);
+  text-shadow: 3px 3px 0 var(--karashi);
 }
 .hero-sub {
-  margin: 2px 0 0;
-  font-family: var(--display); font-weight: 400;
-  font-size: 1.7rem; line-height: 1.2;
+  margin: 0;
+  font-weight: 700;
+  font-size: 1.15rem; line-height: 1.2;
+  white-space: nowrap;
   color: var(--shu);
   letter-spacing: .06em;
 }
@@ -690,9 +697,13 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
     <figure class="tv">
       <video id="top-video" src="画像/昭和の目利き_トップ動画_v2.mp4" poster="画像/昭和の目利き_トップ動画_ポスター.jpg"
         muted loop playsinline preload="auto" aria-label="昭和の教室や町なみの映像（字幕つき）"></video>
-      <button class="tv-sound" id="btn-video-sound" type="button" aria-pressed="false">動画の音を出す</button>
     </figure>
+    <!-- 動画のすぐ下：左に副題、右に動画の音のボタン。その下に題字 -->
     <div class="hero">
+      <div class="title-row">
+        <p class="hero-sub">高い？ 安い？</p>
+        <button class="tv-sound" id="btn-video-sound" type="button" aria-pressed="false">動画の音を出す</button>
+      </div>
       <h1 class="hero-title">昭和の目利き</h1>
     </div>
     <!-- 下へ動かすことを知らなくても始められるよう、最初の画面の中に大きなボタンを置く -->
