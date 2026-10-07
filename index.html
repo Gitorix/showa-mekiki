@@ -120,7 +120,7 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
 .chip:active, .chip.pressed { transform: translateY(2px); filter: brightness(.9); }
 
 /* ---------- はじめの画面 ---------- */
-.tv { margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.tv { margin: 0; position: relative; }
 .tv video {
   display: block;
   width: 100%; max-width: 100%;
@@ -132,8 +132,8 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
   box-shadow: var(--offset) var(--offset) 0 var(--karashi);
 }
 .tv-sound {
-  align-self: flex-end;
-  font-size: 1rem; font-weight: 700;
+  position: absolute; right: 12px; bottom: 12px;
+  font-size: .9rem; font-weight: 700;
   background: var(--card);
   border: 2px solid var(--ink);
   border-radius: 999px;
@@ -141,6 +141,9 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
   padding: .1em 1em;
   box-shadow: 3px 3px 0 var(--ink);
 }
+/* 縦が短いスマホと大きい字では、「すぐに遊ぶ」が最初の画面に入るよう動画を低く表示する（字幕のある下側を残す） */
+@media (max-height: 760px) { .tv video { aspect-ratio: 16 / 7; object-position: 50% 100%; } }
+:root.big .tv video { aspect-ratio: 16 / 7; object-position: 50% 100%; }
 .tv-sound::before { content: "♪ "; color: var(--shu); }
 .tv-sound[aria-pressed="true"] { background: var(--ai); color: var(--cream); }
 .tv-sound[aria-pressed="true"]::before { color: var(--karashi); }
@@ -157,36 +160,38 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
 .hero-title {
   margin: 6px 0 0;
   font-family: var(--display); font-weight: 400;
-  font-size: 3.4rem; line-height: 1.05;
+  font-size: 2.6rem; font-size: min(2.6rem, 14vw); line-height: 1.15;
   letter-spacing: .04em;
+  white-space: nowrap;
   color: var(--ink);
   text-shadow: var(--offset) var(--offset) 0 var(--karashi);
 }
 .hero-sub {
-  margin: 4px 0 0;
+  margin: 2px 0 0;
   font-family: var(--display); font-weight: 400;
-  font-size: 1.9rem; line-height: 1.2;
+  font-size: 1.7rem; line-height: 1.2;
   color: var(--shu);
   letter-spacing: .06em;
 }
-.hero-lead { margin: 6px 0 0; font-size: 1.05rem; line-height: 1.7; }
-/* チラシの「爆発マーク」。品目の数を知らせる */
-.burst {
-  position: absolute; right: 0; top: 40px;
-  margin: 0;
-  width: 6.2rem; height: 6.2rem;
-  display: grid; place-content: center; text-align: center;
-  background: var(--karashi);
-  color: var(--ink);
-  clip-path: polygon(50% 0, 61% 14%, 79% 7%, 80% 25%, 98% 28%, 88% 44%, 100% 58%, 83% 66%, 88% 84%, 70% 82%, 61% 100%, 50% 87%, 39% 100%, 30% 82%, 12% 84%, 17% 66%, 0 58%, 12% 44%, 2% 28%, 20% 25%, 21% 7%, 39% 14%);
-  transform: rotate(8deg);
-  line-height: 1.15;
+/* 最初の画面の大きなボタン */
+.start-cta { display: flex; flex-direction: column; gap: 10px; }
+.btn-quick { flex-direction: column; gap: 0; min-height: 5rem; line-height: 1.25; letter-spacing: .06em; }
+.btn-quick .q-main { font-size: 1.8rem; }
+.btn-quick .q-sub { font-size: .9rem; font-weight: 400; letter-spacing: .02em; }
+.more-btn {
+  display: flex; align-items: center; justify-content: center; gap: .5em;
+  min-height: 3.4rem;
+  font-size: 1.15rem; font-weight: 700;
+  background: var(--card);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius);
+  box-shadow: var(--offset) var(--offset) 0 var(--ink);
 }
-.burst b { font-family: var(--display); font-weight: 400; font-size: 1.6rem; color: var(--shu); line-height: 1; }
-.burst span { font-size: .85rem; font-weight: 700; }
-/* 狭い画面と大きい字では、題字に重ならないよう爆発マークを出さない。写真の上の年の札も少し小さく */
-@media (max-width: 360px) { .burst { display: none; } .era { font-size: .85rem; } }
-:root.big .burst { display: none; }
+.more-btn:active { transform: translate(var(--offset), var(--offset)); box-shadow: 0 0 0 var(--ink); }
+.more-arrow { color: var(--shu); animation: nudge 1.4s ease-in-out infinite; display: inline-block; }
+@keyframes nudge { 50% { transform: translateY(4px); } }
+/* 写真の上の年の札は、狭い画面では少し小さく */
+@media (max-width: 360px) { .era { font-size: .85rem; } }
 
 .era-title {
   margin: 4px 0 0;
@@ -270,8 +275,7 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
 .howto b { color: var(--shu); }
 
 /* ---------- 進み具合 ---------- */
-.progress { display: flex; align-items: center; gap: 10px; }
-.progress-count { margin: 0; font-size: 1.1rem; font-weight: 700; white-space: nowrap; display: flex; align-items: center; gap: .3em; }
+.progress-count { margin: 0 0 0 auto; font-size: 1.1rem; font-weight: 700; white-space: nowrap; display: flex; align-items: center; gap: .3em; }
 .progress-count b {
   font-family: var(--display); font-weight: 400;
   font-size: 1.3rem;
@@ -280,7 +284,6 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
   background: var(--shu-fill); color: var(--cream);
 }
 .progress-count span { font-weight: 400; margin-left: .2em; }
-.progress::after { content: ""; flex: 1; height: 3px; background: var(--ink); }
 
 /* ---------- 品物の札 ---------- */
 .board { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -498,6 +501,8 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
 .verdict { margin: 0; font-weight: 700; font-size: 2rem; line-height: 1.2; color: var(--shu); letter-spacing: .06em; }
 .verdict.miss { color: var(--ai); }
 .memo-you { margin: 0; font-size: 1rem; color: var(--ink-soft); }
+.memo-score { margin: 0; font-size: 1rem; }
+.memo-score b { color: var(--shu); font-size: 1.15em; }
 .memo-compare { margin: 0; font-size: 1.1rem; line-height: 1.6; }
 .memo-compare b { color: var(--shu); }
 .nw { white-space: nowrap; }
@@ -587,7 +592,8 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
 .find-price { margin: 0; font-size: 1rem; line-height: 1.45; font-variant-numeric: tabular-nums; }
 .find-price b { font-family: var(--display); font-weight: 400; color: var(--shu); font-size: 1.25em; }
 .find-price .now { display: inline-block; color: var(--wakatake); font-weight: 700; }
-.result-actions { display: grid; grid-template-columns: 1fr; gap: 14px; }
+.result-actions .big-btn { min-height: 3.3rem; font-size: 1.35rem; }
+.result-actions .btn-sub { font-size: 1.15rem; min-height: 3rem; }
 
 .source { font-size: .9rem; line-height: 1.7; color: var(--ink-soft); }
 .source summary { cursor: pointer; min-height: 2.6rem; display: flex; align-items: center; text-decoration: underline; text-underline-offset: .2em; color: var(--ink); }
@@ -666,6 +672,7 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
   .tag.flip, .hanko, .toast, .celebrate .shade { animation: none; }
   .kusudama .half, .kusudama .banner { animation-duration: .01s; animation-delay: 0s; }
   .big-btn, .ticket, .chip, .brand { transition: none; }
+  .more-arrow { animation: none; }
 }
 </style>
 
@@ -673,7 +680,8 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
 <div class="app">
   <header class="topbar">
     <button class="brand" id="btn-home" type="button" aria-label="はじめの画面へ">昭和の目利き</button>
-    <div class="tools">
+    <p class="progress-count" id="progress" hidden>第<b id="q-num">1</b>問<span>／ 全10問</span></p>
+    <div class="tools" id="tools">
       <button class="chip" id="btn-font" type="button" aria-pressed="false">大きい字</button>
       <button class="chip" id="btn-sound" type="button" aria-pressed="true">音あり</button>
     </div>
@@ -687,13 +695,16 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
       <button class="tv-sound" id="btn-video-sound" type="button" aria-pressed="false">動画の音を出す</button>
     </figure>
     <div class="hero">
-      <p class="hero-ribbon">なつかしの値段あて</p>
-      <h1 class="hero-title">昭和の<br>目利き</h1>
+      <p class="hero-ribbon" id="hero-ribbon">なつかしの値段あて</p>
+      <h1 class="hero-title">昭和の目利き</h1>
       <p class="hero-sub">高い？ 安い？</p>
-      <p class="hero-lead" id="hero-lead">あのころの値段、覚えていますか？</p>
-      <p class="burst" id="burst" aria-hidden="true"></p>
     </div>
-    <h2 class="era-title">時代を選んでください</h2>
+    <!-- 下へ動かすことを知らなくても始められるよう、最初の画面の中に大きなボタンを置く -->
+    <div class="start-cta">
+      <button class="big-btn btn-go btn-quick" id="btn-quick" type="button"><span class="q-main">▶ すぐに遊ぶ</span><span class="q-sub">いろいろな時代から10問</span></button>
+      <button class="more-btn" id="btn-to-eras" type="button">時代を選んで遊ぶ<span class="more-arrow" aria-hidden="true">▼</span></button>
+    </div>
+    <h2 class="era-title" id="era-title">時代を選んでください</h2>
     <div class="eras" id="eras"></div>
     <ol class="howto">
       <li><span>2つの品物の値段をくらべて、<b>「高い」</b>か<b>「安い」</b>を押します。</span></li>
@@ -704,9 +715,6 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
 
   <!-- 出題 -->
   <section id="screen-play" class="stack" hidden>
-    <div class="progress" id="progress">
-      <p class="progress-count">第<b id="q-num">1</b>問<span>／ 全10問</span></p>
-    </div>
     <div class="board" id="board"></div>
     <section class="reveal" id="reveal" hidden aria-live="polite"></section>
     <div class="actions">
@@ -1013,6 +1021,15 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
     sound(correct ? "ok" : "ng");
     render(true);
     if (correct && [3, 5, 7, 10].includes(state.streak)) celebrate(state.streak);
+    // 札の判子を見てもらってから、「正解！」と説明が見える位置まで、ゆっくり画面を動かす
+    const qAt = state.results.length;
+    setTimeout(() => {
+      if (state.screen !== "play" || state.results.length !== qAt) return;
+      const top = $("reveal").getBoundingClientRect().top;
+      if (top > window.innerHeight * 0.4) {
+        window.scrollTo({ top: window.scrollY + top - 12, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+      }
+    }, 900);
   }
 
   function next() {
@@ -1103,7 +1120,7 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
         (isApprox(c) || c.foreign ? '<span class="approx">約</span>' : "") + yen(c.price) + "<small>円</small></div>";
     const usd = c.foreign ? '<div class="usd"><b>' + usdText(c.usd) + "</b><span>" + rateText(c) + "</span></div>" : "";
     // 見出し帯：色だけでなく文字でも「どちらを答えるか」がわかるように
-    const tab = role === "known" ? "くらべる" : role === "quiz" ? "いくら？" : c.foreign ? "アメリカでは？" : "これは？";
+    const tab = role === "known" ? "くらべる" : role === "quiz" ? "いくら？" : c.foreign ? "アメリカは？" : "これは？";
     return '<article class="' + cls + '">' +
       '<p class="sign-tab">' + tab + "</p>" +
       iconHTML(it, "sign-icon", "div", era + hanko) +
@@ -1154,8 +1171,7 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
   }
 
   function renderStart() {
-    $("hero-lead").textContent = "あのころの値段、覚えていますか？";
-    $("burst").innerHTML = "<span>全</span><b>" + ITEM_COUNT + "</b><span>品目</span>";
+    $("hero-ribbon").textContent = "なつかしの値段あて・全" + ITEM_COUNT + "品目";
     // 時代のボタンは昔の硬い紙の切符。「昭和30年代 ゆき」
     $("eras").innerHTML = ERAS.map(e => {
       const best = store.get("best:" + e.id, null);
@@ -1232,6 +1248,7 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
     rv.innerHTML =
       '<p class="verdict' + (ok ? "" : " miss") + '">' + (ok ? "正解！" : "ざんねん") + "</p>" +
       '<p class="memo-you">あなたの答え：' + mine + "</p>" +
+      '<p class="memo-score">ここまで <b>' + state.results.filter(r => r.correct).length + "問</b> 正解（" + state.results.length + "問中）</p>" +
       '<p class="memo-compare">' + compare + "</p>" +
       (calc ? '<p class="memo-calc">' + calc + "</p>" : "") +
       '<p class="memo-head">なるほどメモ</p>' +
@@ -1271,7 +1288,7 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
       "</div></div>" +
       '<div><h2 class="finds-title">今日の発見</h2><p class="finds-lead">あのころの値段と、いまの値段です。</p></div>' +
       '<ul class="finds">' + finds + "</ul>" +
-      '<div class="result-actions">' +
+      '<div class="actions result-actions">' +
         '<button class="big-btn btn-go" id="btn-again" type="button">同じ時代でもう一度</button>' +
         '<button class="big-btn btn-sub" id="btn-era" type="button">時代を選びなおす</button>' +
       "</div>";
@@ -1287,6 +1304,7 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
       lock(TAP_LOCK);
       tapFeedback(true);
       goHome();
+      $("era-title").scrollIntoView({ block: "start" });
     });
   }
 
@@ -1295,6 +1313,8 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
     $("btn-home").hidden = state.screen === "start";
     $("btn-home").textContent = state.screen === "play" ? "やめる" : "昭和の目利き";
     $("btn-home").setAttribute("aria-label", state.screen === "play" ? "ゲームをやめる" : "はじめの画面へ");
+    $("progress").hidden = state.screen !== "play";
+    $("tools").hidden = state.screen === "play";
     syncVideo();
     $("screen-start").hidden = state.screen !== "start";
     $("screen-play").hidden = state.screen !== "play";
@@ -1343,6 +1363,17 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
   video.addEventListener("canplay", () => { if (state.screen === "start" && video.paused && !reduceMotion) syncVideo(); }, { once: true });
 
   // ---------- 操作 ----------
+  $("btn-quick").addEventListener("click", e => {
+    if (locked()) return;
+    lock(TAP_LOCK);
+    e.currentTarget.classList.add("chosen");
+    tapFeedback(true);
+    setTimeout(() => newGame("all"), 200);
+  });
+  $("btn-to-eras").addEventListener("click", () => {
+    tapFeedback(true);
+    $("era-title").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+  });
   $("eras").addEventListener("click", e => {
     const b = e.target.closest("[data-era]");
     if (!b || locked()) return;
