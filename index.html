@@ -921,6 +921,24 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
 }
 /* END_PLAY_ACCESSIBILITY */
 
+
+/* ERA_SWITCH: 平成の目利きへ切りかえる小さな札（はじめの画面の札のいちばん下。遊ぶじゃまにならないよう控えめに） */
+.era-switch {
+  display: inline-flex; align-items: center; gap: .25em;
+  min-height: 2.4rem;
+  padding: .1em .75em;
+  font-size: .85rem; font-weight: 700; line-height: 1.3;
+  color: #9c0f55;
+  background: #fff0f7;
+  border: 2px solid #9c0f55;
+  border-radius: 999px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.era-switch span { font-size: .8em; }
+.era-switch:active { transform: translateY(2px); filter: brightness(.95); }
+.era-switch:focus-visible { outline: 3px solid var(--ai); outline-offset: 2px; }
+
 /* START_VIDEO_TOP: 動画を表紙としていちばん上に。すぐ下の「遊びはじめる」まで最初の画面に収める（どの幅でも1列） */
 .app[data-view="start"] { max-width: 32rem; }
 #screen-start { gap: 10px; }
@@ -944,7 +962,7 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
 #screen-start .start-primary { margin: 0; }
 #screen-start .start-reassurance { margin: 8px 0 12px; font-size: .9rem; line-height: 1.5; }
 #screen-start .start-rule { margin: 14px 0 4px; font-size: .95rem; line-height: 1.6; }
-#screen-start .start-links { justify-content: flex-start; margin-top: 0; }
+#screen-start .start-links { justify-content: space-between; align-items: center; margin-top: 0; }
 #screen-start .memory-shelf { margin: 0; }
 
 
@@ -1049,6 +1067,8 @@ button:disabled { cursor: wait; }
       <p class="start-rule">品物の値段をくらべて、<b>「高い」か「安い」</b>を選びます。</p>
       <div class="start-links">
         <button class="text-button" id="btn-howto" type="button">遊び方を見る</button>
+        <!-- 平成の目利きへの切りかえ。遊ぶじゃまにならないよう、札のいちばん下に小さく置く -->
+        <a class="era-switch" id="era-switch" href="heisei.html">平成で遊ぶ <span aria-hidden="true">▶</span></a>
       </div>
     </div>
     <div class="memory-shelf">
