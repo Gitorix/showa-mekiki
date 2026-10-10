@@ -118,6 +118,9 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
   white-space: nowrap;
 }
 .chip[aria-pressed="true"] { background: var(--ai); color: var(--cream); }
+/* 音楽ボタン：遊んでいる途中も押せるよう、上の帯にいつも出す */
+.music-chip { font-size: .8rem; padding-inline: .6em; }
+.topbar:has(#progress:not([hidden])) .music-chip { order: 3; }
 .chip:active, .chip.pressed { transform: translateY(2px); filter: brightness(.9); }
 
 /* ---------- はじめの画面 ---------- */
@@ -1425,6 +1428,7 @@ button:disabled { cursor: wait; }
   <header class="topbar">
     <button class="brand" id="btn-home" type="button" aria-label="はじめの画面へ">平成の目利き</button>
     <p class="progress-count" id="progress" tabindex="-1" role="heading" aria-level="2" hidden>第<b id="q-num">1</b>問<span>（全10問）</span></p>
+    <button class="chip music-chip" id="btn-music" type="button" aria-pressed="false" hidden>♪ 音楽なし</button>
     <div class="tools" id="tools">
       <button class="chip" id="btn-font" type="button" aria-pressed="false">大きい字</button>
       <button class="chip" id="btn-sound" type="button" aria-pressed="true">音あり</button>
@@ -2430,6 +2434,7 @@ button:disabled { cursor: wait; }
     $("btn-home").setAttribute("aria-label", state.screen === "play" ? "ゲームをやめる" : "はじめの画面へ");
     document.querySelector(".app").dataset.view = state.screen;
     setHeisei(state.screen);
+    stageSync();
     $("progress").hidden = state.screen !== "play";
     $("tools").hidden = state.screen === "play";
     $("screen-eras").hidden = state.screen !== "eras";
@@ -2466,6 +2471,7 @@ button:disabled { cursor: wait; }
     // 動画のときは「動画を再生／動画を止める」、3Dのときは「動かす／動きを止める」
     const isVideo = !!(stage && stage.hasSound);
     $("btn-video-play").textContent = isVideo ? (playing ? "動画を止める" : "動画を再生") : (playing ? "動きを止める" : "動かす");
+    musicLabel();
     const snd = $("btn-video-sound");
     snd.hidden = !(stage && stage.hasSound);
     if (stage && stage.hasSound) {
@@ -2474,14 +2480,36 @@ button:disabled { cursor: wait; }
       snd.setAttribute("aria-pressed", String(on));
     }
   }
+  // 動画の音楽を流しているときは、遊び方・問題・結果の画面に移っても止めずに流しつづける（動画は見えなくても音は鳴る）。
+  // 音楽を流していないときは、はじめの画面でだけ音なしで動画を流す
   function stageSync() {
-    if (!stage && window.HeiseiFX && state.screen === "start") { stage = window.HeiseiFX.stage($("top-stage"), heiseiPhotos(), stageLabel); }
+    const wantStage = state.screen === "start" || (window.HeiseiFX && window.HeiseiFX.stageIsVideo);
+    if (!stage && window.HeiseiFX && wantStage) { stage = window.HeiseiFX.stage($("top-stage"), heiseiPhotos(), stageLabel); }
     if (stage) {
-      if (state.screen === "start" && !document.hidden && stageRequested) stage.play();
-      else { stage.pause(); if (state.screen !== "start") stage.mute(); }
+      const music = stage.hasSound && !stage.muted();
+      if (!document.hidden && stageRequested && (state.screen === "start" || music)) stage.play();
+      else stage.pause();
     }
     stageLabel();
   }
+  function musicLabel() {
+    const b = $("btn-music");
+    const has = !!(stage && stage.hasSound);
+    b.hidden = !has || state.screen === "start"; // はじめの画面では、動画の下の「音を出す」ボタンで切りかえる
+    if (!has) return;
+    const on = !stage.muted() && stage.playing();
+    b.textContent = on ? "♪ 音楽あり" : "♪ 音楽なし";
+    b.setAttribute("aria-pressed", String(on));
+    b.setAttribute("aria-label", on ? "音楽を止める" : "音楽を流す");
+  }
+  $("btn-music").addEventListener("click", () => {
+    if (!stage || !stage.hasSound) return;
+    tapFeedback(false);
+    const on = !stage.muted() && stage.playing();
+    if (on) stage.mute();
+    else { if (stage.muted()) stage.toggleSound(); stageRequested = true; }
+    stageSync();
+  });
   $("btn-video-play").addEventListener("click", () => {
     stageRequested = !(stage && stage.playing());
     stageSync();
