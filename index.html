@@ -939,6 +939,14 @@ button:focus-visible, summary:focus-visible { outline: 4px solid var(--ai); outl
 .era-switch:active { transform: translateY(2px); filter: brightness(.95); }
 .era-switch:focus-visible { outline: 3px solid var(--ai); outline-offset: 2px; }
 
+
+/* MUSIC_CHIP: 音楽の入り切り。設定ボタンと同じ形で、どの画面でも上の帯に出す */
+.music-chip { font-size: .85rem; padding-inline: .4em; }
+#screen-play ~ * .music-chip, .topbar:has(#progress:not([hidden])) { gap: 6px; }
+.music-chip[aria-pressed="true"] { background: var(--ai); color: var(--cream); }
+.topbar:has(#progress:not([hidden])) { flex-wrap: wrap; }
+.topbar:has(#progress:not([hidden])) .music-chip { order: 3; }
+
 /* START_VIDEO_TOP: 動画を表紙としていちばん上に。すぐ下の「遊びはじめる」まで最初の画面に収める（どの幅でも1列） */
 .app[data-view="start"] { max-width: 32rem; }
 #screen-start { gap: 10px; }
@@ -1039,7 +1047,9 @@ button:disabled { cursor: wait; }
 <div class="app">
   <header class="topbar">
     <button class="brand" id="btn-home" type="button" aria-label="はじめの画面へ">昭和の目利き</button>
-    <p class="progress-count" id="progress" tabindex="-1" role="heading" aria-level="2" hidden>第<b id="q-num">1</b>問<span>（全10問）</span></p>
+    <p class="progress-count" id="progress" tabindex="-1" role="heading" aria-level="2" hidden>第<b id="q-num">1</b>問<span aria-label="全10問中">／10</span></p>
+    <!-- 動画の音楽（BGM）の入り切り。遊んでいる途中も使えるよう、設定ボタンとは別に置く -->
+    <button class="chip music-chip" id="btn-music" type="button" aria-pressed="false" aria-label="動画の音楽">♪音楽なし</button>
     <div class="tools" id="tools">
       <button class="chip" id="btn-font" type="button" aria-pressed="false">大きい字</button>
       <button class="chip" id="btn-sound" type="button" aria-pressed="true">音あり</button>
@@ -1729,6 +1739,8 @@ button:disabled { cursor: wait; }
     document.querySelector(".app").dataset.view = state.screen;
     $("progress").hidden = state.screen !== "play";
     $("tools").hidden = state.screen === "play";
+    // はじめの画面は動画のすぐ下に「音を出す」があるので、音楽ボタンはそれ以外の画面で出す
+    $("btn-music").hidden = state.screen === "start";
     syncVideo();
     $("screen-eras").hidden = state.screen !== "eras";
     $("screen-help").hidden = state.screen !== "help";
@@ -1759,22 +1771,33 @@ button:disabled { cursor: wait; }
   const video = $("top-video");
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
   let videoRequested = !reduceMotion.matches;
+  // 音を出しているときは、動画の音楽をBGMとして、遊び方・問題・結果の画面でも流し続ける
+  const musicPlaying = () => !video.muted && videoRequested;
   function videoLabel() {
     const on = !video.muted;
     $("btn-video-sound").textContent = on ? "音を消す" : "音を出す";
     $("btn-video-sound").setAttribute("aria-pressed", String(on));
     $("btn-video-play").textContent = video.paused ? "動画を再生" : "動画を止める";
+    const music = on && !video.paused;
+    $("btn-music").textContent = music ? "♪音楽あり" : "♪音楽なし";
+    $("btn-music").setAttribute("aria-pressed", String(music));
   }
   function syncVideo() {
-    if (state.screen === "start" && !document.hidden && videoRequested) {
+    const play = !document.hidden && (state.screen === "start" ? videoRequested : musicPlaying());
+    if (play) {
       const p = video.play();
       if (p && p.catch) p.catch(videoLabel);
     } else {
       video.pause();
-      if (state.screen !== "start") video.muted = true;
     }
     videoLabel();
   }
+  $("btn-music").addEventListener("click", () => {
+    if (video.muted || video.paused) { video.muted = false; videoRequested = true; }
+    else video.muted = true;
+    tapFeedback(false);
+    syncVideo();
+  });
   $("btn-video-play").addEventListener("click", () => {
     videoRequested = video.paused;
     syncVideo();
