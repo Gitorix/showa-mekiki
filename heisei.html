@@ -1,6 +1,10 @@
 <!doctype html>
 <html lang="ja">
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js 'sha256-CE/kPJMng12mSf0fIDNyCM/jDjEH1J+uUQWcIeXGXkQ=' 'sha256-kcKN+qdx9rDSnzul0fy/bdfqsz5a6rDGMsPn6Lt5gwg=' 'sha256-fotU9pIC/HT4cz2mCxcXM3rhTlEjkUopBlH28zYB6NA='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; worker-src 'none'">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net/npm/three@0.160.0/; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'; worker-src 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta property="og:type" content="website">
 <meta property="og:title" content="平成の目利き">
@@ -9,6 +13,14 @@
 <meta property="og:image" content="https://gitorix.github.io/showa-mekiki/%E7%94%BB%E5%83%8F/%E5%B9%B3%E6%88%90%E3%81%AE%E7%9B%AE%E5%88%A9%E3%81%8D_%E3%83%88%E3%83%83%E3%83%97CG%E5%8B%95%E7%94%BB_%E8%A1%A8%E7%B4%99.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <title>平成の目利き</title>
+<!-- three.js（3Dの部品）を、決まった版の、中身が書きかえられていないものだけ読みこむ（指紋＝integrity が合わないと読まない）。
+     版を上げるときは URL と sha384 の両方を変える -->
+<script type="importmap">
+{
+  "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" },
+  "integrity": { "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js": "sha384-61S/Nu32S3E5+n+KpCOTb2eRYps6fVKm+9Gz1QBvSePFthb46f063Aa/qe/lykFZ" }
+}
+</script>
 <meta name="description" content="平成の品物の値段を見くらべて当てる、時代を選べるハイ＆ローゲーム「平成の目利き」">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
